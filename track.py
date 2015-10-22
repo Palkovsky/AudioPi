@@ -1,6 +1,7 @@
 from pygame import mixer
 from datetime import datetime
 import math
+import time
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
 import ntpath
@@ -15,12 +16,16 @@ class Track:
 		self.mixer.init()
 		self.setVolume(volume)
 		self.loadTrack(path)
+
+	def reInit(self):
 		self.playbackOffset = 0
+		self.paused = False
 
 	def loadTrack(self, path):
 		self.trackPath = path
 		self.extension = self.__getExtension(self.trackPath)
 		self.mixer.music.load(path)
+		self.reInit()
 
 	def play(self):
 		self.mixer.music.play()
@@ -29,22 +34,36 @@ class Track:
 		self.mixer.music.stop()
 
 	def pause(self):
+		self.paused = True
 		self.mixer.music.pause()
 
 	def unpause(self):
+		self.paused = False
 		self.mixer.music.unpause()
+
+	def isPaused(self):
+		return self.paused
 
 	def restart(self):
 		self.stop()
 		self.play()
 
 	def isPlaying(self):
+		if not self.isPaused():
+			return self.mixer.music.get_busy()
+		return int(self.isPaused == 'false')
+
+	def isBusy(self):
 		return self.mixer.music.get_busy()
 
 	def getVolume(self):
 		return self.mixer.music.get_volume()
 
 	def setVolume(self, volume):
+		if(volume > 1):
+			volume = 1
+		elif(volume < 0):
+			volume = 0
 		self.mixer.music.set_volume(volume)
 
 	def getPlaybackPosition(self):
@@ -94,6 +113,25 @@ class Track:
 
 		return strMins + ":" + strSecs
 
+	def playbackInfo(self):
+		return { 'playback' : {
+				'playing' : self.isPlaying(),
+				'paused' : self.isPaused(),
+				'path' : self.trackPath,
+				'position' : {
+					'millis' : self.getPlaybackPosition(),
+					'secs' : round(self.getPlaybackPosition() / 1000),
+					'formatted' : self.formattedTimestamp()
+				},
+
+				'total' : {
+					'millis' : self.getLength(),
+					'secs' : round(self.getLength()/1000),
+					'formatted' : self.formattedTimestamp(self.getLength())
+				}
+			}
+		}
+
 	def getMetadata(self):
 
 		artistName = None
@@ -113,11 +151,13 @@ class Track:
 		trackGenre = audio['genre'][0] if 'genre' in audio else trackGenre
 		trackLength = audio.info.length * 1000.0
 
-		return { 'artist' : artistName,
-				'album' : albumName,
-				'title' : trackTitle,
-				'genre' : trackGenre,
-				'length' : trackLength }
+		return {'metadata' : { 
+					'artist' : artistName,
+					'album' : albumName,
+					'title' : trackTitle,
+					'genre' : trackGenre,
+					'length' : round(trackLength) 
+				}}
 
 	def setEndevent(self, callback):
 		self.mixer.music.set_endevent(callback)
@@ -128,3 +168,6 @@ class Track:
 	def __path_leaf(self, path):
 		head, tail = ntpath.split(path)
 		return tail or ntpath.basename(head)
+
+	def __current_milli_time(self):
+		return int(round(time.time() * 1000))
