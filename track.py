@@ -20,6 +20,8 @@ class Track:
 	def reInit(self):
 		self.playbackOffset = 0
 		self.paused = False
+		self.cachedLength = self.__getLength()
+		self.cachedMetadata = self.__getMetadata()
 
 	def loadTrack(self, path):
 		self.trackPath = path
@@ -80,12 +82,7 @@ class Track:
 		self.mixer.music.set_pos(secs)
 
 	def getLength(self):
-		audio = None
-		if self.extension == ".mp3":
-			audio = MP3(self.trackPath)
-		elif self.extension == ".flac":
-			audio = FLAC(self.trackPath)
-		return audio.info.length * 1000
+		return self.cachedLength
 
 	def dispose(self):
 		self.mixer.quit()
@@ -125,14 +122,30 @@ class Track:
 				},
 
 				'total' : {
-					'millis' : self.getLength(),
+					'millis' : round(self.getLength()),
 					'secs' : round(self.getLength()/1000),
 					'formatted' : self.formattedTimestamp(self.getLength())
 				}
 			}
 		}
 
+
+
 	def getMetadata(self):
+		return self.cachedMetadata
+
+	def setEndevent(self, callback):
+		self.mixer.music.set_endevent(callback)
+
+	def __getLength(self):
+		audio = None
+		if self.extension == ".mp3":
+			audio = MP3(self.trackPath)
+		elif self.extension == ".flac":
+			audio = FLAC(self.trackPath)
+		return audio.info.length * 1000
+
+	def __getMetadata(self):
 
 		artistName = None
 		albumName = None
@@ -157,10 +170,7 @@ class Track:
 					'title' : trackTitle,
 					'genre' : trackGenre,
 					'length' : round(trackLength) 
-				}}
-
-	def setEndevent(self, callback):
-		self.mixer.music.set_endevent(callback)
+		}}
 
 	def __getExtension(self, path):
 		return os.path.splitext(path)[1]

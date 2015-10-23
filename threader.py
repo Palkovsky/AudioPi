@@ -23,7 +23,8 @@ class TrackThreader():
 		while track.isBusy():
 			continue
 		if(self.onEndCustomCallback == None):
-			print(self.track.getPath() + " finished playing.")
+			if(self.track != None):
+				print(self.track.getPath() + " finished playing.")
 			self.setTrack(None)
 		else:
 			self.__play_track(track, self.onEndCustomCallback)
@@ -43,3 +44,4 @@ class TrackThreader():
 
 	def registerOnEndCustomCallback(self, callback):
 		self.onEndCustomCallback = callback
+

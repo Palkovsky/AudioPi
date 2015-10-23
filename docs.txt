@@ -1,0 +1,6 @@
+/track/play [POST, GET]
+	GET: p(path), t(terminate)
+		p is path to the audio track
+		if 't' == True => terminate current track
+	POST: p(path), t(terminate)
+		UP
