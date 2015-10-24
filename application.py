@@ -2,27 +2,23 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from constants import error_codes 
-from helpers import send_error, send_state_message, track_endevent, is_valid_file, check_boolean
-from threader import TrackThreader
+from helpers import send_error, send_state_track_message
+from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
+from helpers import check_boolean, check_string, check_integer
+from threader import TrackThreader, PlaylistThreader
 
 import os
 
 app = Flask(__name__)
 
-musicThreader = TrackThreader()
-
+trackThreader = TrackThreader()
+playlistThreader = PlaylistThreader()
 
 @app.route('/track/play', methods=['GET', 'POST'])
-def play():
-	currentTrack = musicThreader.currentTrack()
+def play_track():
+	currentTrack = trackThreader.currentTrack()
 
-	trackPath = ""
-	termiate = False
-	if(request.method == 'POST'):
-		trackPath = request.form.get('p', type = str)
-	else:
-		trackPath = request.args.get('p')
-
+	trackPath = check_string(request, 'p')
 	terminate = check_boolean(request, 't')
 
 	if(currentTrack == None):
@@ -31,26 +27,19 @@ def play():
 
 		if terminate:
 			currentTrack.stop()
-			musicThreader.setTrack(None)
+			trackThreader.setTrack(None)
 			return startTrack(trackPath)
 
 		return send_error(error_codes.TRACK_ALREADY_PLAYING, "Track already exsists")
 
 @app.route('/track/rewind', methods=['GET', 'POST'])
-def rewind():
-	currentTrack = musicThreader.currentTrack()
+def rewind_track():
+	currentTrack = trackThreader.currentTrack()
 	
-	destPos = -1
+	destPos = check_integer(request, 'pos')
 	unpause = True
 
-	if(request.method == 'POST'):
-		destPos = request.form.get('pos', type = int)
-	else:
-		destPos = request.args.get('pos')
-
-	try:
-		destPos = int(destPos)
-	except:
+	if destPos == None:
 		return send_error(error_codes.WRONG_PLAYBACK_POSITION, "Wrong playback position")
 
 	unpause = check_boolean(request, 'unpause')
@@ -70,15 +59,15 @@ def rewind():
 		if unpause and currentTrack.isPaused():
 			currentTrack.unpause()
 
-		return send_state_message(currentTrack, "Playback position succesfully changed", {
+		return send_state_track_message(currentTrack, "Playback position succesfully changed", {
 				'newPosition' : destPos,
 				'oldPosition' : oldPos,
 				'total' : total
 			})
 
 @app.route('/track/pause')
-def pause():
-	currentTrack = musicThreader.currentTrack()
+def pause_track():
+	currentTrack = trackThreader.currentTrack()
 
 	if(currentTrack == None):
 		return send_error(error_codes.NO_TRACK, "No track playing")
@@ -86,11 +75,11 @@ def pause():
 		return send_error(error_codes.TRACK_ALREADY_PAUSED, "Track is already paused")
 	else:
 		currentTrack.pause()
-		return send_state_message(currentTrack, "Track paused")
+		return send_state_track_message(currentTrack, "Track paused")
 		
 @app.route('/track/unpause')
-def unpause():
-	currentTrack = musicThreader.currentTrack()
+def unpause_track():
+	currentTrack = trackThreader.currentTrack()
 
 	if(currentTrack == None):
 		return send_error(error_codes.NO_TRACK, "No track playing")
@@ -98,36 +87,83 @@ def unpause():
 		return send_error(error_codes.TRACK_ALREADY_PLAYING, "Track is already playing")
 	else:
 		currentTrack.unpause()
-		return send_state_message(currentTrack, "Track unpaused")
+		return send_state_track_message(currentTrack, "Track unpaused")
 
 @app.route('/track/metadata', methods=['GET'])
-def metadata():
-	currentTrack = musicThreader.currentTrack()
+def metadata_track():
+	currentTrack = trackThreader.currentTrack()
 	if(currentTrack != None):
 		return jsonify(currentTrack.getMetadata())
 	return send_error(error_codes.NO_TRACK, "No track playing")
 
 @app.route('/track/playback', methods=['GET'])
-def playback():
-	currentTrack = musicThreader.currentTrack()
+def playback_track():
+	currentTrack = trackThreader.currentTrack()
 	if(currentTrack != None):
 		return jsonify(currentTrack.playbackInfo())
 	return send_error(error_codes.NO_TRACK, "No track playing")
 
-
-@app.route('/stop')
-def stop():
-	currentTrack = musicThreader.currentTrack()
+@app.route('/track/stop')
+def stop_track():
+	currentTrack = trackThreader.currentTrack()
 	if(currentTrack != None):
 		currentTrack.stop()
-		musicThreader.setTrack(None)
+		trackThreader.setTrack(None)
 		return jsonify({'message' : "Track stopped"})
 	else:
 		return send_error(error_codes.NO_TRACK, "No track playing")
 
+
+# PLAYLIST SECTION
+
+@app.route('/playlist/play', methods=['GET', 'POST'])
+def play_playlist():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	defaultPosition = check_integer(request, 'i')
+
+	if currentPlaylist == None:
+		exampleTracks = ['tracks/track.mp3', 'tracks/track2.mp3', 'tracks/track3.flac', 'tracks/track4.mp3', 'tracks/track5.mp3']
+		
+		if defaultPosition != None and is_valid_num(0, len(exampleTracks) - 1, defaultPosition):
+			data = playlistThreader.getThread(exampleTracks, defaultPosition)
+		else:
+			data = playlistThreader.getThread(exampleTracks)
+
+		playlistThread = data.get('thread')
+		currentPlaylist = data.get('playlist')
+
+		playlistThread.start()
+
+		return send_state_playlist_message(currentPlaylist, "Playlist succesfully started", None, 1, False)
+
+	else:
+		return send_error(error_codes.PLAYLIST_EXSIST, "Playlist already exsist")
+
+@app.route('/playlist/playback')
+def playlist_playback():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None:
+		return jsonify(currentPlaylist.playbackInfo(error_codes.SUCCESFULL_QUERY))
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
+
+@app.route('/playlist/stop')
+def stop_playlist():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None:
+		currentPlaylist.stop()
+		playlistThreader.setPlaylist(None)
+
+		return jsonify({'message' : "Playlist stopped" })
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
+
 #Utility methods
 def startTrack(trackPath):
-	#musicThreader.registerOnEndCustomCallback(track_endevent)
+	#trackThreader.registerOnEndCustomCallback(track_endevent)
 
 	if(trackPath == "" or trackPath == None):
 		return send_error(error_codes.NO_PATH_DEFINED, "No path parameter passed.")
@@ -138,11 +174,11 @@ def startTrack(trackPath):
 	if not is_valid_file(trackPath):
 		return send_error(error_codes.INVALID_TYPE, "Invalid filetype.")
 
-	data = musicThreader.getThread(trackPath)
+	data = trackThreader.getThread(trackPath)
 	currentThread = data.get('thread')
 	currentTrack = data.get('track')
 	currentThread.start()
-	return send_state_message(currentTrack, "Track started")
+	return send_state_track_message(currentTrack, "Track started")
 
 if __name__ == '__main__':
     app.run(debug=True)

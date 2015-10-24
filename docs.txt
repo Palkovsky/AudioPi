@@ -4,3 +4,7 @@
 		if 't' == True => terminate current track
 	POST: p(path), t(terminate)
 		UP
+
+/playlist/play [POST, GET]
+	- i(ndex) = default position
+	- tracks = array of track paths

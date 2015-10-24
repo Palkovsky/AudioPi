@@ -5,7 +5,6 @@ from queue import Queue
 
 
 class TrackThreader():
-
 	def __init__(self):
 		self.playingThread = None
 		self.track = None
@@ -44,4 +43,46 @@ class TrackThreader():
 
 	def registerOnEndCustomCallback(self, callback):
 		self.onEndCustomCallback = callback
+
+class PlaylistThreader():
+	def __init__(self):
+		self.playingThread = None
+		self.playlist = None
+
+	def __play_playlist(self, position = 0):
+		self.playlist.play(position)
+		self.__oversee_playlist()
+
+	def __oversee_playlist(self):
+
+		for i in range(len(self.playlist.tracks)):
+
+			#This sometimes gives error when stopping playlist
+			#try/except keeps it off from showing
+			try:
+				while self.playlist != None and self.playlist.currentTrack.isBusy():
+					continue
+			except:
+				pass
+
+			if self.playlist != None and self.playlist.nextTrackAvilable():
+				self.playlist.nextTrack()
+
+		if(self.playlist != None):
+			print("Playlist finished playing")
+			self.setPlaylist(None)
+
+
+	def getThread(self, tracks, position = 0):
+		self.playlist = Playlist(tracks)
+		self.playingThread = threading.Thread(target = self.__play_playlist, args=(position,))
+		self.playingThread.daemon = True
+		return {'thread' : self.playingThread,
+				'playlist' : self.playlist}
+
+	def currentPlaylist(self):
+		return self.playlist
+
+	def setPlaylist(self, playlist):
+		self.playlist = playlist
 

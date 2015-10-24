@@ -14,9 +14,6 @@ class Playlist:
 	def play(self, position = 0):
 		if len(self.tracks) > 0 and len(self.tracks) > position:
 
-			#if(self.currentTrack != None):
-			#	self.currentTrack.dispose()
-
 			self.position = position
 			self.currentTrack = Track(self.tracks[self.position])
 			self.currentTrack.setVolume(self.volume)
@@ -25,14 +22,13 @@ class Playlist:
 			raise IndexError('Wrong track position')
 
 	def nextTrack(self):
-		if len(self.tracks) > self.position + 1:
-			self.play(self.position + 1)
-			return True
-		return False
+		self.play(self.position + 1)
 
 	def previousTrack(self):
-		if self.position > 0 and len(self.tracks) > 0:
-			self.play(self.position - 1)
+		self.play(self.position - 1)
+
+	def nextTrackAvilable(self):
+		if len(self.tracks) > self.position + 1:
 			return True
 		return False
 
@@ -50,6 +46,9 @@ class Playlist:
 	def unpause(self):
 		self.currentTrack.unpause()
 
+	def stop(self):
+		self.currentTrack.stop()
+
 	def isPaused(self):
 		return self.currentTrack.isPaused()
 
@@ -57,7 +56,15 @@ class Playlist:
 		return self.volume
 
 	def isPlaying(self):
-		return self.currentTrack.isPlaying()
+		if self.currentTrack != None:
+			return self.currentTrack.isPlaying()
+		return None
+
+	def isPaused(self):
+		if self.currentTrack != None:
+			return self.currentTrack.isPaused()
+		return None
+
 
 	def getPosition(self):
 		return self.position;
@@ -67,3 +74,20 @@ class Playlist:
 
 	def onTrackEnd(self, callback):
 		callback(self.position)
+
+	def getTracks(self):
+		return self.tracks
+
+	def playbackInfo(self, code):
+
+		base_response = {
+							'code' : code,
+							'position' : self.position,
+							'total' : len(self.tracks)
+						}
+
+		base_response.update(self.currentTrack.playbackInfo())
+
+		response = {'playlist' : base_response }
+
+		return response
