@@ -9,8 +9,9 @@
 	- i(ndex) = default position
 	- tracks = array of track paths
 
+/playlist/pos [POST, GET]
+	-i(ndex) = position of track
 
 TO DO:
--prev/next actions
 -rewinding current playlist track
 -volume controls

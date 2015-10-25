@@ -86,3 +86,8 @@ def check_integer(request, field):
 		return data
 	except:
 		return None
+
+def isNull(object):
+	if object == None:
+		return True
+	return False

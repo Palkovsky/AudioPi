@@ -17,6 +17,7 @@ class Globals():
 		self.WRONG_TRACK_INDEX = 1032
 		self.NO_NEXT_TRACK = 1035
 		self.NO_PREV_TRACK = 1036
+		self.INVALID_TRACK_INDEX = 1037
 
 		#OTHERS
 		self.SUCCESFULL_QUERY = 999

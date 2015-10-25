@@ -4,7 +4,7 @@ from flask import jsonify
 from constants import error_codes 
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
-from helpers import check_boolean, check_string, check_integer
+from helpers import check_boolean, check_string, check_integer, isNull
 from threader import TrackThreader, PlaylistThreader
 
 import os
@@ -164,6 +164,21 @@ def playlist_prev():
 			return send_state_playlist_message(currentPlaylist, "Track succesfully changed")
 		else:
 			return send_error(error_codes.NO_PREV_TRACK, "No previous track avilable")
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
+
+@app.route('/playlist/pos', methods=['GET', 'POST'])
+def playlist_pos():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None:
+		index = check_integer(request, 'i')
+
+		if index == None or not is_valid_num(0, len(currentPlaylist.tracks) - 1, index):
+			return send_error(error_codes.INVALID_TRACK_INDEX, "Invalid track index")
+		else:
+			currentPlaylist.play(index)
+			return send_state_playlist_message(currentPlaylist, "Track succesfully changed")
 	else:
 		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
 
