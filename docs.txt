@@ -8,3 +8,9 @@
 /playlist/play [POST, GET]
 	- i(ndex) = default position
 	- tracks = array of track paths
+
+
+TO DO:
+-prev/next actions
+-rewinding current playlist track
+-volume controls

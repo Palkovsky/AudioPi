@@ -123,7 +123,7 @@ def play_playlist():
 	defaultPosition = check_integer(request, 'i')
 
 	if currentPlaylist == None:
-		exampleTracks = ['tracks/track.mp3', 'tracks/track2.mp3', 'tracks/track3.flac', 'tracks/track4.mp3', 'tracks/track5.mp3']
+		exampleTracks = ['tracks/track5.mp3', 'tracks/track2.mp3', 'tracks/track5.mp3']
 		
 		if defaultPosition != None and is_valid_num(0, len(exampleTracks) - 1, defaultPosition):
 			data = playlistThreader.getThread(exampleTracks, defaultPosition)
@@ -139,6 +139,33 @@ def play_playlist():
 
 	else:
 		return send_error(error_codes.PLAYLIST_EXSIST, "Playlist already exsist")
+
+@app.route('/playlist/next')
+def playlist_next():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None:
+		if currentPlaylist.nextTrackAvilable():
+			currentPlaylist.nextTrack()
+			return send_state_playlist_message(currentPlaylist, "Track succesfully changed")
+		else:
+			return send_error(error_codes.NO_NEXT_TRACK, "No next track avilable")
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
+
+
+@app.route('/playlist/prev')
+def playlist_prev():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None:
+		if currentPlaylist.prevTrackAvilable():
+			currentPlaylist.previousTrack()
+			return send_state_playlist_message(currentPlaylist, "Track succesfully changed")
+		else:
+			return send_error(error_codes.NO_PREV_TRACK, "No previous track avilable")
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
 
 @app.route('/playlist/playback')
 def playlist_playback():

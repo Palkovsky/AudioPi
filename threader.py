@@ -48,6 +48,8 @@ class PlaylistThreader():
 	def __init__(self):
 		self.playingThread = None
 		self.playlist = None
+		self.nextTrack = False
+		self.prevTrack = True
 
 	def __play_playlist(self, position = 0):
 		self.playlist.play(position)
@@ -55,22 +57,18 @@ class PlaylistThreader():
 
 	def __oversee_playlist(self):
 
-		for i in range(len(self.playlist.tracks)):
-
-			#This sometimes gives error when stopping playlist
-			#try/except keeps it off from showing
+		while True:
 			try:
-				while self.playlist != None and self.playlist.currentTrack.isBusy():
-					continue
+				if self.playlist.nextTrackAvilable() and self.playlist.shouldGoNext():
+					print("NEXT TRACK!")
+					self.playlist.nextTrack()
+				if not self.playlist.nextTrackAvilable() and self.playlist.shouldGoNext():
+					print("Playlist finished playing")
+					self.setPlaylist(None)
+					break
 			except:
-				pass
-
-			if self.playlist != None and self.playlist.nextTrackAvilable():
-				self.playlist.nextTrack()
-
-		if(self.playlist != None):
-			print("Playlist finished playing")
-			self.setPlaylist(None)
+				self.setPlaylist(None)
+				break
 
 
 	def getThread(self, tracks, position = 0):
@@ -85,4 +83,10 @@ class PlaylistThreader():
 
 	def setPlaylist(self, playlist):
 		self.playlist = playlist
+
+	def skipTrack(self):
+		self.nextTrack = True
+
+	def previousTrack(self):
+		self.prevTrack = True
 

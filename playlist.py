@@ -4,16 +4,17 @@ class Playlist:
 
 	def __init__(self, tracks, volume = 1):
 		self.position = -1
+		self.threadCount = len(tracks)
 		self.volume = volume
 		self.currentTrack = None
 		self.tracks = tracks
 
 	def loadTracks(self, tracks):
 		self.tracks = tracks
+		self.threadCount = len(tracks)
 
 	def play(self, position = 0):
 		if len(self.tracks) > 0 and len(self.tracks) > position:
-
 			self.position = position
 			self.currentTrack = Track(self.tracks[self.position])
 			self.currentTrack.setVolume(self.volume)
@@ -23,12 +24,19 @@ class Playlist:
 
 	def nextTrack(self):
 		self.play(self.position + 1)
+		#self.threadCount += 1
 
 	def previousTrack(self):
 		self.play(self.position - 1)
+		#self.threadCount += 1
 
 	def nextTrackAvilable(self):
 		if len(self.tracks) > self.position + 1:
+			return True
+		return False
+
+	def prevTrackAvilable(self):
+		if len(self.tracks) > 0 and self.position - 1 >= 0:
 			return True
 		return False
 
@@ -91,3 +99,12 @@ class Playlist:
 		response = {'playlist' : base_response }
 
 		return response
+
+	def shouldGoNext(self):
+		data = self.currentTrack.playbackInfo()
+		current = data.get('playback').get('position').get('millis')
+		total = data.get('playback').get('total').get('millis')
+
+		if current >= total:
+			return True
+		return False

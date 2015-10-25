@@ -39,6 +39,8 @@ def send_state_playlist_message(playlist, message, extra = None, playing = None,
 				'message' : message,
 				'position' : playlist.getPosition(),
 				'elements' : playlist.getTracks(),
+				'nextTrack' : playlist.nextTrackAvilable(),
+				'previousTrack' : playlist.prevTrackAvilable(),
 				'state' : {'playing' : isPlaying, 'paused' : isPaused}}
 
 	if extra != None:
