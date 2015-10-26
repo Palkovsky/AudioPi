@@ -24,11 +24,9 @@ class Playlist:
 
 	def nextTrack(self):
 		self.play(self.position + 1)
-		#self.threadCount += 1
 
 	def previousTrack(self):
 		self.play(self.position - 1)
-		#self.threadCount += 1
 
 	def nextTrackAvilable(self):
 		if len(self.tracks) > self.position + 1:

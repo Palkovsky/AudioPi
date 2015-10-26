@@ -8,10 +8,13 @@
 /playlist/play [POST, GET]
 	- i(ndex) = default position
 	- tracks = array of track paths
+	- t(erminate) = do you want to terminate current playlist
+
 
 /playlist/pos [POST, GET]
 	-i(ndex) = position of track
 
 TO DO:
+-exception handling in startPlaylist()
 -rewinding current playlist track
 -volume controls

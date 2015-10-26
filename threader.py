@@ -6,7 +6,6 @@ from queue import Queue
 
 class TrackThreader():
 	def __init__(self):
-		self.playingThread = None
 		self.track = None
 		self.onEndCustomCallback = None
 
@@ -48,28 +47,27 @@ class PlaylistThreader():
 	def __init__(self):
 		self.playingThread = None
 		self.playlist = None
-		self.nextTrack = False
-		self.prevTrack = True
 
 	def __play_playlist(self, position = 0):
 		self.playlist.play(position)
 		self.__oversee_playlist()
 
 	def __oversee_playlist(self):
-
 		while True:
 			try:
-				if self.playlist.nextTrackAvilable() and self.playlist.shouldGoNext():
+				if self.playlist == None:
+					break
+
+				if self.playlist != None and self.playlist.nextTrackAvilable() and self.playlist.shouldGoNext():
 					print("NEXT TRACK!")
 					self.playlist.nextTrack()
-				if not self.playlist.nextTrackAvilable() and self.playlist.shouldGoNext():
+
+				if self.playlist != None and not self.playlist.nextTrackAvilable() and self.playlist.shouldGoNext():
 					print("Playlist finished playing")
 					self.setPlaylist(None)
 					break
 			except:
-				self.setPlaylist(None)
 				break
-
 
 	def getThread(self, tracks, position = 0):
 		self.playlist = Playlist(tracks)
@@ -78,15 +76,16 @@ class PlaylistThreader():
 		return {'thread' : self.playingThread,
 				'playlist' : self.playlist}
 
+	def startThread(self):
+		if self.playingThread != None:
+			self.playingThread.start()
+
 	def currentPlaylist(self):
 		return self.playlist
 
 	def setPlaylist(self, playlist):
 		self.playlist = playlist
 
-	def skipTrack(self):
-		self.nextTrack = True
-
-	def previousTrack(self):
-		self.prevTrack = True
-
+	def reInit(self):
+		self.playingThread = None
+		self.playlist = None

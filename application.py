@@ -4,7 +4,7 @@ from flask import jsonify
 from constants import error_codes 
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
-from helpers import check_boolean, check_string, check_integer, isNull
+from helpers import check_boolean, check_string, check_integer, check_string_array, isNull
 from threader import TrackThreader, PlaylistThreader
 
 import os
@@ -121,23 +121,21 @@ def play_playlist():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
 	defaultPosition = check_integer(request, 'i')
+	terminate = check_boolean(request, 't')
+	tracks = check_string_array(request, "track")
+
+	#http://localhost:5000/playlist/play?track=tracks/track5.mp3&track=tracks/track2.mp3&track=tracks/track5.mp3&i=0&t=True
 
 	if currentPlaylist == None:
-		exampleTracks = ['tracks/track5.mp3', 'tracks/track2.mp3', 'tracks/track5.mp3']
-		
-		if defaultPosition != None and is_valid_num(0, len(exampleTracks) - 1, defaultPosition):
-			data = playlistThreader.getThread(exampleTracks, defaultPosition)
-		else:
-			data = playlistThreader.getThread(exampleTracks)
-
-		playlistThread = data.get('thread')
-		currentPlaylist = data.get('playlist')
-
-		playlistThread.start()
-
-		return send_state_playlist_message(currentPlaylist, "Playlist succesfully started", None, 1, False)
-
+		return startPlaylist(tracks, defaultPosition)
 	else:
+
+		if terminate:
+			currentPlaylist.stop()
+			playlistThreader.setPlaylist(None)
+			playlistThreader.reInit()
+			return startPlaylist(tracks, defaultPosition)
+
 		return send_error(error_codes.PLAYLIST_EXSIST, "Playlist already exsist")
 
 @app.route('/playlist/next')
@@ -221,6 +219,18 @@ def startTrack(trackPath):
 	currentTrack = data.get('track')
 	currentThread.start()
 	return send_state_track_message(currentTrack, "Track started")
+
+def startPlaylist(tracks, defaultPosition = 0):		
+		if defaultPosition != None and is_valid_num(0, len(tracks) - 1, defaultPosition):
+			data = playlistThreader.getThread(tracks, defaultPosition)
+		else:
+			data = playlistThreader.getThread(tracks)
+
+		currentPlaylist = data.get('playlist')
+
+		playlistThreader.startThread()
+
+		return send_state_playlist_message(currentPlaylist, "Playlist succesfully started", None, 1, False)
 
 if __name__ == '__main__':
     app.run(debug=True)

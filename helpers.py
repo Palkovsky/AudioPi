@@ -87,6 +87,12 @@ def check_integer(request, field):
 	except:
 		return None
 
+def check_string_array(request, field):
+	if request.method == 'POST':
+		return request.form.getlist(field)
+	else:
+		return request.args.getlist(field)
+
 def isNull(object):
 	if object == None:
 		return True
