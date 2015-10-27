@@ -3,12 +3,16 @@ from constants import whitelisted_extensions, error_codes
 
 import os
 
-def send_error(error_code, message):
-	return jsonify({ 'error' : {
-						'code' : error_code,
-						'message' : message
-					}
-				})
+def send_error(error_code, message, json = True):
+	response = { 'error' : {
+							'code' : error_code,
+							'message' : message
+						}
+				}
+	if json:
+		return jsonify(response)
+	else:
+		return response
 
 def send_state_track_message(track, message, extra = None, response_code = error_codes.SUCCESFULL_QUERY):
 
@@ -45,6 +49,15 @@ def send_state_playlist_message(playlist, message, extra = None, playing = None,
 
 	if extra != None:
 		response.update(extra)
+
+	return jsonify(response)
+
+def send_playlist_play_error(indexes, message, code = error_codes.INVALID_TRACKS):
+
+	response = {'code' : code,
+				'message' : message,
+				'wrong_positions' : indexes
+				}
 
 	return jsonify(response)
 

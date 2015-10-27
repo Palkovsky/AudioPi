@@ -5,6 +5,7 @@ from constants import error_codes
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
 from helpers import check_boolean, check_string, check_integer, check_string_array, isNull
+from helpers import send_playlist_play_error
 from threader import TrackThreader, PlaylistThreader
 
 import os
@@ -131,9 +132,10 @@ def play_playlist():
 	else:
 
 		if terminate:
-			currentPlaylist.stop()
-			playlistThreader.setPlaylist(None)
-			playlistThreader.reInit()
+			if currentPlaylist != None and currentPlaylist.currentTrack != None:
+				currentPlaylist.stop()
+				playlistThreader.setPlaylist(None)
+				playlistThreader.reInit()
 			return startPlaylist(tracks, defaultPosition)
 
 		return send_error(error_codes.PLAYLIST_EXSIST, "Playlist already exsist")
@@ -225,6 +227,25 @@ def startPlaylist(tracks, defaultPosition = 0):
 			data = playlistThreader.getThread(tracks, defaultPosition)
 		else:
 			data = playlistThreader.getThread(tracks)
+
+		if len(tracks) == 0:
+			return send_error(error_codes.NO_PATH_DEFINED, "No track parameter passed.")
+
+		errorPos = []
+		for index, trackPath in enumerate(tracks):
+
+			if not os.path.exists(trackPath):
+				errorPos.append({"index" : index})
+				errorPos[-1].update(send_error(error_codes.WRONG_PATH_SPECIFIED, "File doesn't exsist.", False))
+				continue
+
+			if not is_valid_file(trackPath):
+				errorPos.append({"index" : index})
+				errorPos[-1].update(send_error(error_codes.INVALID_TYPE, "Invalid filetype.", False))
+				continue
+
+		if len(errorPos) > 0:
+			return send_playlist_play_error(errorPos, "Invalid track array")
 
 		currentPlaylist = data.get('playlist')
 
