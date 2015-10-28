@@ -1,5 +1,6 @@
 from flask import jsonify
 from constants import whitelisted_extensions, error_codes
+from settings import volumizer
 
 import os
 
@@ -20,14 +21,14 @@ def send_state_track_message(track, message, extra = None, response_code = error
 				'message' : message,
 				'title' : track.getMetadata().get('metadata').get('title'),
 				'path' : track.getPath(),
-				'state' : {'playing' : track.isPlaying(), 'paused' : track.isPaused()}}
+				'state' : {'playing' : track.isPlaying(), 'paused' : track.isPaused(), 'muted' : volumizer.isMuted()}}
 
 	if extra != None:
 		response.update(extra)
 
 	return jsonify(response)
 
-def send_state_playlist_message(playlist, message, extra = None, playing = None, paused = None,response_code = error_codes.SUCCESFULL_QUERY):
+def send_state_playlist_message(playlist, message, extra = None, playing = None, paused = None, response_code = error_codes.SUCCESFULL_QUERY):
 	
 	if playing == None:
 		isPlaying = playlist.isPlaying()
@@ -45,7 +46,7 @@ def send_state_playlist_message(playlist, message, extra = None, playing = None,
 				'elements' : playlist.getTracks(),
 				'nextTrack' : playlist.nextTrackAvilable(),
 				'previousTrack' : playlist.prevTrackAvilable(),
-				'state' : {'playing' : isPlaying, 'paused' : isPaused}}
+				'state' : {'playing' : isPlaying, 'paused' : isPaused, 'muted' : volumizer.isMuted()}}
 
 	if extra != None:
 		response.update(extra)
@@ -96,6 +97,19 @@ def check_integer(request, field):
 
 	try:
 		data = int(data)
+		return data
+	except:
+		return None
+
+
+def check_float(request, field):
+	if(request.method == 'POST'):
+		data = request.form.get(field, type = float)
+	else:
+		data = request.args.get(field)
+
+	try:
+		data = float(data)
 		return data
 	except:
 		return None

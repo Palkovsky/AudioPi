@@ -58,6 +58,11 @@ class Playlist:
 	def isPaused(self):
 		return self.currentTrack.isPaused()
 
+	def isMuted(self):
+		if self.currentTrack != None:
+			return self.currentTrack.isMuted()
+		return False
+
 	def getVolume(self):
 		return self.volume
 
@@ -103,6 +108,6 @@ class Playlist:
 		current = data.get('playback').get('position').get('millis')
 		total = data.get('playback').get('total').get('millis')
 
-		if current >= total:
+		if current >= total or current == -1:
 			return True
 		return False

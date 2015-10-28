@@ -1,5 +1,6 @@
 from playlist import Playlist
 from track import Track
+from settings import volumizer
 import threading
 from queue import Queue
 
@@ -8,6 +9,7 @@ class TrackThreader():
 	def __init__(self):
 		self.track = None
 		self.onEndCustomCallback = None
+		self.volume = volumizer.getJSON()['config']['milli']
 
 	def __play_track(self, track, callback = None):
 		if(callback == None):
@@ -28,7 +30,7 @@ class TrackThreader():
 			self.__play_track(track, self.onEndCustomCallback)
 
 	def getThread(self, path):
-		self.track = Track(path)
+		self.track = Track(path, self.volume)
 		self.playingThread = threading.Thread(target = self.__play_track, args=(self.track, ))
 		self.playingThread.daemon = True
 		return {'thread' : self.playingThread,
@@ -40,6 +42,11 @@ class TrackThreader():
 	def setTrack(self, track):
 		self.track = track
 
+	def setVolume(self, volume):
+		self.volume = volume
+		if self.track != None:
+			self.track.setVolume(volume)
+
 	def registerOnEndCustomCallback(self, callback):
 		self.onEndCustomCallback = callback
 
@@ -47,6 +54,7 @@ class PlaylistThreader():
 	def __init__(self):
 		self.playingThread = None
 		self.playlist = None
+		self.volume = volumizer.getJSON()['config']['milli']
 
 	def __play_playlist(self, position = 0):
 		self.playlist.play(position)
@@ -55,6 +63,7 @@ class PlaylistThreader():
 	def __oversee_playlist(self):
 		while True:
 			try:
+				
 				if self.playlist == None:
 					break
 
@@ -70,7 +79,7 @@ class PlaylistThreader():
 				break
 
 	def getThread(self, tracks, position = 0):
-		self.playlist = Playlist(tracks)
+		self.playlist = Playlist(tracks, self.volume)
 		self.playingThread = threading.Thread(target = self.__play_playlist, args=(position,))
 		self.playingThread.daemon = True
 		return {'thread' : self.playingThread,
@@ -89,3 +98,9 @@ class PlaylistThreader():
 	def reInit(self):
 		self.playingThread = None
 		self.playlist = None
+
+
+	def setVolume(self, volume):
+		self.volume = volume
+		if self.playlist != None and self.playlist.currentTrack != None:
+			self.playlist.setVolume(volume)

@@ -1,5 +1,5 @@
 
-class Globals():
+class ErrorGlobals():
 
 	def __init__(self):
 
@@ -20,9 +20,28 @@ class Globals():
 		self.INVALID_TRACK_INDEX = 1037
 		self.INVALID_TRACKS = 1038
 
+
+		#VOLUME
+		self.INVALID_VALUE = 1069
+
+
 		#OTHERS
 		self.SUCCESFULL_QUERY = 999
 		
+class ParamGlobals(object):
 
-error_codes = Globals()
+	def __init__(self):
+		
+		self.PATH = "p"
+		self.TERMINATE = "t"
+		self.VALUE = "value"
+		self.POSITION = "pos"
+		self.INDEX = "i"
+		self.UNPAUSE = "unpause"
+
+		self.TRACK = "track"
+		
+
+error_codes = ErrorGlobals()
+params = ParamGlobals()
 whitelisted_extensions = ['.flac', '.mp3']

@@ -4,6 +4,7 @@ import math
 import time
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
+from settings import volumizer
 import ntpath
 import os
 
@@ -114,6 +115,7 @@ class Track:
 		return { 'playback' : {
 				'playing' : self.isPlaying(),
 				'paused' : self.isPaused(),
+				'muted' : self.isMuted(),
 				'path' : self.trackPath,
 				'position' : {
 					'millis' : self.getPlaybackPosition(),
@@ -136,6 +138,10 @@ class Track:
 
 	def setEndevent(self, callback):
 		self.mixer.music.set_endevent(callback)
+
+
+	def isMuted(self):
+		return volumizer.isMuted()
 
 	def __getLength(self):
 		audio = None

@@ -1,12 +1,13 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
-from constants import error_codes 
+from constants import error_codes, params
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
-from helpers import check_boolean, check_string, check_integer, check_string_array, isNull
+from helpers import check_boolean, check_string, check_integer, check_float, check_string_array, isNull
 from helpers import send_playlist_play_error
 from threader import TrackThreader, PlaylistThreader
+from settings import volumizer
 
 import os
 
@@ -19,10 +20,10 @@ playlistThreader = PlaylistThreader()
 def play_track():
 	currentTrack = trackThreader.currentTrack()
 
-	trackPath = check_string(request, 'p')
-	terminate = check_boolean(request, 't')
+	trackPath = check_string(request, params.PATH)
+	terminate = check_boolean(request, params.TERMINATE)
 
-	if(currentTrack == None):
+	if currentTrack == None:
 		return startTrack(trackPath)
 	else:
 
@@ -37,13 +38,13 @@ def play_track():
 def rewind_track():
 	currentTrack = trackThreader.currentTrack()
 	
-	destPos = check_integer(request, 'pos')
+	destPos = check_integer(request, params.POSITION)
 	unpause = True
 
 	if destPos == None:
 		return send_error(error_codes.WRONG_PLAYBACK_POSITION, "Wrong playback position")
 
-	unpause = check_boolean(request, 'unpause')
+	unpause = check_boolean(request, params.UNPAUSE)
 
 	if currentTrack == None:
 		return send_error(error_codes.NO_TRACK, "No track playing")
@@ -82,9 +83,9 @@ def pause_track():
 def unpause_track():
 	currentTrack = trackThreader.currentTrack()
 
-	if(currentTrack == None):
+	if currentTrack == None:
 		return send_error(error_codes.NO_TRACK, "No track playing")
-	elif( not currentTrack.isPaused()):
+	elif not currentTrack.isPaused():
 		return send_error(error_codes.TRACK_ALREADY_PLAYING, "Track is already playing")
 	else:
 		currentTrack.unpause()
@@ -93,7 +94,7 @@ def unpause_track():
 @app.route('/track/metadata', methods=['GET'])
 def metadata_track():
 	currentTrack = trackThreader.currentTrack()
-	if(currentTrack != None):
+	if currentTrack != None:
 		return jsonify(currentTrack.getMetadata())
 	return send_error(error_codes.NO_TRACK, "No track playing")
 
@@ -107,7 +108,7 @@ def playback_track():
 @app.route('/track/stop')
 def stop_track():
 	currentTrack = trackThreader.currentTrack()
-	if(currentTrack != None):
+	if currentTrack != None:
 		currentTrack.stop()
 		trackThreader.setTrack(None)
 		return jsonify({'message' : "Track stopped"})
@@ -121,9 +122,9 @@ def stop_track():
 def play_playlist():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
-	defaultPosition = check_integer(request, 'i')
-	terminate = check_boolean(request, 't')
-	tracks = check_string_array(request, "track")
+	defaultPosition = check_integer(request, params.INDEX)
+	terminate = check_boolean(request, params.TERMINATE)
+	tracks = check_string_array(request, params.TRACK)
 
 	#http://localhost:5000/playlist/play?track=tracks/track5.mp3&track=tracks/track2.mp3&track=tracks/track5.mp3&i=0&t=True
 
@@ -167,12 +168,53 @@ def playlist_prev():
 	else:
 		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
 
+
+
+@app.route('/playlist/rewind', methods=['GET', 'POST'])
+def playlist_rewind():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None:
+		currentTrack = currentPlaylist.currentTrack
+		
+		destPos = check_integer(request, params.POSITION)
+		unpause = True
+
+		if destPos == None:
+			return send_error(error_codes.WRONG_PLAYBACK_POSITION, "Wrong playback position")
+
+		unpause = check_boolean(request, params.UNPAUSE)
+
+		if currentTrack == None:
+			return send_error(error_codes.NO_TRACK, "No track playing")
+		elif destPos == -1:
+			return send_error(error_codes.WRONG_PLAYBACK_POSITION, "No position specified")
+		elif destPos < 0 or destPos > round(currentTrack.getLength() / 1000):
+			return send_error(error_codes.WRONG_PLAYBACK_POSITION, "Wrong playback position. It should be specified with seconds")
+		else:
+
+			oldPos = currentTrack.playbackInfo().get('playback').get('position').get('secs')
+			total = currentTrack.playbackInfo().get('playback').get('total').get('secs')
+			currentTrack.setPlaybackPosition(destPos)
+
+			if unpause and currentTrack.isPaused():
+				currentTrack.unpause()
+
+			return send_state_playlist_message(currentPlaylist, "Playback position succesfully changed", {
+					'newPosition' : destPos,
+					'oldPosition' : oldPos,
+					'total' : total
+				})
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
+
+
 @app.route('/playlist/pos', methods=['GET', 'POST'])
 def playlist_pos():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
 	if currentPlaylist != None:
-		index = check_integer(request, 'i')
+		index = check_integer(request, params.INDEX)
 
 		if index == None or not is_valid_num(0, len(currentPlaylist.tracks) - 1, index):
 			return send_error(error_codes.INVALID_TRACK_INDEX, "Invalid track index")
@@ -191,6 +233,44 @@ def playlist_playback():
 	else:
 		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
 
+
+@app.route('/playlist/pause')
+def playlist_pause():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None:
+		currentTrack = currentPlaylist.currentTrack
+
+		if(currentTrack == None):
+			return send_error(error_codes.NO_TRACK, "No track playing")
+		elif(currentTrack.isPaused()):
+			return send_error(error_codes.TRACK_ALREADY_PAUSED, "Track is already paused")
+		else:
+			currentTrack.pause()
+			return send_state_playlist_message(currentPlaylist, "Track paused")
+
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")	
+
+
+@app.route('/playlist/unpause')
+def playlist_unpause():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None:
+		currentTrack = currentPlaylist.currentTrack
+
+		if(currentTrack == None):
+			return send_error(error_codes.NO_TRACK, "No track playing")
+		elif not currentTrack.isPaused():
+			return send_error(error_codes.TRACK_ALREADY_PLAYING, "Track is already playing")
+		else:
+			currentTrack.unpause()
+			return send_state_playlist_message(currentPlaylist, "Track unpaused")
+
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")		
+
 @app.route('/playlist/stop')
 def stop_playlist():
 	currentPlaylist = playlistThreader.currentPlaylist()
@@ -202,6 +282,29 @@ def stop_playlist():
 		return jsonify({'message' : "Playlist stopped" })
 	else:
 		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
+
+
+#Config API actions
+@app.route('/volume', methods = ['GET'])
+def get_volume():
+	respone = volumizer.getJSON()
+	respone.update({"code" : error_codes.SUCCESFULL_QUERY})
+	return jsonify(respone)
+
+@app.route('/volume', methods = ['POST'])
+def set_volume():
+	respone = volumizer.setVolume(check_float(request, params.VALUE))
+
+	if respone == None:
+		return send_error(error_codes.INVALID_VALUE, "Invalid volume value. Only 0 - 100")
+
+	respone.update({"code" : error_codes.SUCCESFULL_QUERY})
+
+	vol = respone['config']['milli']
+	playlistThreader.setVolume(vol)
+	trackThreader.setVolume(vol)
+
+	return jsonify(respone)
 
 #Utility methods
 def startTrack(trackPath):
@@ -252,6 +355,7 @@ def startPlaylist(tracks, defaultPosition = 0):
 		playlistThreader.startThread()
 
 		return send_state_playlist_message(currentPlaylist, "Playlist succesfully started", None, 1, False)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
