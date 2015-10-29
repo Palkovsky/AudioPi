@@ -1,3 +1,4 @@
+import getpass
 
 class ErrorGlobals():
 
@@ -27,11 +28,14 @@ class ErrorGlobals():
 
 		#OTHERS
 		self.SUCCESFULL_QUERY = 999
+
+		#Paths
+		self.PATH_EMPTY = 1100
+		self.INVALID_PATH = 1101
 		
-class ParamGlobals(object):
+class ParamGlobals():
 
 	def __init__(self):
-		
 		self.PATH = "p"
 		self.TERMINATE = "t"
 		self.VALUE = "value"
@@ -40,8 +44,14 @@ class ParamGlobals(object):
 		self.UNPAUSE = "unpause"
 
 		self.TRACK = "track"
-		
+		self.PATH = "path"
+
+class Defaults():
+	def __init__(self):
+		self.path = '/media/' + getpass.getuser()
+
 
 error_codes = ErrorGlobals()
 params = ParamGlobals()
+defaults = Defaults()
 whitelisted_extensions = ['.flac', '.mp3']

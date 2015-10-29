@@ -5,9 +5,10 @@ from constants import error_codes, params
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
 from helpers import check_boolean, check_string, check_integer, check_float, check_string_array, isNull
-from helpers import send_playlist_play_error
+from helpers import send_playlist_play_error, get_defaults
 from threader import TrackThreader, PlaylistThreader
 from settings import volumizer
+from explore import Explorer
 
 import os
 
@@ -15,6 +16,7 @@ app = Flask(__name__)
 
 trackThreader = TrackThreader()
 playlistThreader = PlaylistThreader()
+explorer = Explorer()
 
 @app.route('/track/play', methods=['GET', 'POST'])
 def play_track():
@@ -305,6 +307,25 @@ def set_volume():
 	trackThreader.setVolume(vol)
 
 	return jsonify(respone)
+
+#Explore filesystem action
+@app.route('/data', methods = ['GET', 'POST'])
+def getDirectory():
+
+	path = check_string(request, params.PATH)
+	if path == None:
+		return send_error(error_codes.PATH_EMPTY, "Path should not be empty")
+
+	respone = explorer.getPathContent(path)
+	if respone == None:
+		return send_error(error_codes.INVALID_PATH, "Invalid path")
+
+	respone['code'] = error_codes.SUCCESFULL_QUERY
+	return jsonify(respone)
+
+@app.route('/defaults', methods = ['GET'])
+def defaults():
+	return jsonify(get_defaults())
 
 #Utility methods
 def startTrack(trackPath):

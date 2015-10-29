@@ -63,7 +63,6 @@ class PlaylistThreader():
 	def __oversee_playlist(self):
 		while True:
 			try:
-				
 				if self.playlist == None:
 					break
 

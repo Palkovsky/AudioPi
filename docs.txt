@@ -14,7 +14,11 @@
 /playlist/pos [POST, GET]
 	-i(ndex) = position of track
 
+/playlist/rewind [POST, GET]
+	-pos
+
+/data [POST, GET]
+	-path = path to explore
+
 TO DO:
--exception handling in startPlaylist()
--rewinding current playlist track
--volume controls
+	-exception handling with not exsiting tracks

@@ -1,8 +1,15 @@
 from flask import jsonify
-from constants import whitelisted_extensions, error_codes
+from constants import whitelisted_extensions, error_codes, defaults
 from settings import volumizer
-
 import os
+
+def get_defaults(response_code = error_codes.SUCCESFULL_QUERY):
+	response = {
+		"defaults" : {
+			"default_path" : defaults.path
+		}
+	}
+	return response
 
 def send_error(error_code, message, json = True):
 	response = { 'error' : {
