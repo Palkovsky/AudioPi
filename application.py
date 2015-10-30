@@ -5,10 +5,11 @@ from constants import error_codes, params
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
 from helpers import check_boolean, check_string, check_integer, check_float, check_string_array, isNull
-from helpers import send_playlist_play_error, get_defaults, file_exsists, send_no_file_error
+from helpers import send_playlist_play_error, get_defaults, file_exsists, send_no_file_error, flush_stream
 from threader import TrackThreader, PlaylistThreader
 from settings import volumizer
 from explore import Explorer
+
 
 import os
 
@@ -316,7 +317,7 @@ def getDirectory():
 
 	path = check_string(request, params.PATH)
 	if path == None:
-		return send_error(error_codes.PATH_EMPTY, "Path should not be empty")
+		path = get_defaults()['defaults']['default_path']
 
 	respone = explorer.getPathContent(path)
 	if respone == None:
@@ -329,7 +330,36 @@ def getDirectory():
 def defaults():
 	return jsonify(get_defaults())
 
+
+#Flush every aduio stream
+@app.route('/flush', methods = ['GET', 'POST'])
+def flush():
+
+	flushTrack()
+	flushPlaylist()
+
+	return jsonify({
+		"code" : error_codes.SUCCESFULL_QUERY,
+		"message" : "flushed"
+		})
+
 #Utility methods
+def flushTrack():
+	currentTrack = trackThreader.currentTrack()
+	if currentTrack != None:
+		currentTrack.stop()
+	trackThreader.setTrack(None)
+	flush_stream()
+
+
+def flushPlaylist():
+	currentPlaylist = playlistThreader.currentPlaylist()
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
+		currentPlaylist.stop()
+	playlistThreader.setPlaylist(None)
+	flush_stream()
+
+
 def startTrack(trackPath):
 	#trackThreader.registerOnEndCustomCallback(track_endevent)
 
@@ -342,6 +372,7 @@ def startTrack(trackPath):
 	if not is_valid_file(trackPath):
 		return send_error(error_codes.INVALID_TYPE, "Invalid filetype.")
 
+	flushPlaylist()
 	data = trackThreader.getThread(trackPath)
 	currentThread = data.get('thread')
 	currentTrack = data.get('track')
@@ -373,6 +404,7 @@ def startPlaylist(tracks, defaultPosition = 0):
 		if len(errorPos) > 0:
 			return send_playlist_play_error(errorPos, "Invalid track array")
 
+		flushTrack()
 		currentPlaylist = data.get('playlist')
 
 		playlistThreader.startThread()

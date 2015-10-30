@@ -2,6 +2,7 @@ from flask import jsonify
 from constants import whitelisted_extensions, error_codes, defaults
 from settings import volumizer
 import os
+from pygame import mixer
 
 def get_defaults(response_code = error_codes.SUCCESFULL_QUERY):
 	response = {
@@ -147,3 +148,9 @@ def file_exsists(path):
 	if path != None:
 		return os.path.isfile(path)
 	return False
+
+def flush_stream():
+	try:
+		mixer.music.stop()
+	except:
+		pass
