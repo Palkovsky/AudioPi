@@ -12,10 +12,10 @@ def get_defaults(response_code = error_codes.SUCCESFULL_QUERY):
 	return response
 
 def send_error(error_code, message, json = True):
-	response = { 'error' : {
-							'code' : error_code,
-							'message' : message
-						}
+	response = {
+					'code' : error_code,
+					'message' : message
+						
 				}
 	if json:
 		return jsonify(response)
@@ -37,28 +37,32 @@ def send_state_track_message(track, message, extra = None, response_code = error
 
 def send_state_playlist_message(playlist, message, extra = None, playing = None, paused = None, response_code = error_codes.SUCCESFULL_QUERY):
 	
-	if playing == None:
-		isPlaying = playlist.isPlaying()
+	if playlist != None:
+		if playing == None:
+			isPlaying = playlist.isPlaying()
+		else:
+			isPlaying = playing
+
+		if paused == None:
+			isPaused = playlist.isPaused()
+		else:
+			isPaused = paused
+
+		response = { 'code' : response_code,
+					'message' : message,
+					'position' : playlist.getPosition(),
+					'elements' : playlist.getTracks(),
+					'nextTrack' : playlist.nextTrackAvilable(),
+					'previousTrack' : playlist.prevTrackAvilable(),
+					'state' : {'playing' : isPlaying, 'paused' : isPaused, 'muted' : volumizer.isMuted()}}
+
+		if extra != None:
+			response.update(extra)
+
+		return jsonify(response)
+
 	else:
-		isPlaying = playing
-
-	if paused == None:
-		isPaused = playlist.isPaused()
-	else:
-		isPaused = paused
-
-	response = { 'code' : response_code,
-				'message' : message,
-				'position' : playlist.getPosition(),
-				'elements' : playlist.getTracks(),
-				'nextTrack' : playlist.nextTrackAvilable(),
-				'previousTrack' : playlist.prevTrackAvilable(),
-				'state' : {'playing' : isPlaying, 'paused' : isPaused, 'muted' : volumizer.isMuted()}}
-
-	if extra != None:
-		response.update(extra)
-
-	return jsonify(response)
+		return send_error(error_codes.UNDEFINED, "An error occured(Null pointer exception)")
 
 def send_playlist_play_error(indexes, message, code = error_codes.INVALID_TRACKS):
 
@@ -130,4 +134,16 @@ def check_string_array(request, field):
 def isNull(object):
 	if object == None:
 		return True
+	return False
+
+def send_no_file_error(path):
+	return jsonify({
+		"code" : error_codes.FILE_NOT_EXSISTS,
+		"message" : "File doesn't exsist",
+		"path" : path
+	})
+
+def file_exsists(path):
+	if path != None:
+		return os.path.isfile(path)
 	return False

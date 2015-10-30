@@ -10,13 +10,21 @@ import os
 
 class Track:
 
-	def __init__(self, path, volume = 1.0):
+	def __init__(self, path, onError = None, volume = 1.0):
+
 		self.mixer = mixer
 		self.trackPath = path
 		self.extension = self.__getExtension(self.trackPath)
 		self.mixer.init()
 		self.setVolume(volume)
-		self.loadTrack(path)
+		if onError != None:
+			self.loadTrack(path, onError)
+		else:
+			self.loadTrack(path)
+
+		if not os.path.isfile(path):
+			if onError != None:
+				onError()
 
 	def reInit(self):
 		self.playbackOffset = 0
@@ -24,11 +32,20 @@ class Track:
 		self.cachedLength = self.__getLength()
 		self.cachedMetadata = self.__getMetadata()
 
-	def loadTrack(self, path):
-		self.trackPath = path
-		self.extension = self.__getExtension(self.trackPath)
-		self.mixer.music.load(path)
-		self.reInit()
+	def loadTrack(self, path, onError = None):
+		try:
+			if not os.path.isfile(path):
+				if onError != None:
+					onError()
+					return
+
+			self.trackPath = path
+			self.extension = self.__getExtension(self.trackPath)
+			self.mixer.music.load(path)
+			self.reInit()
+		except:
+			if onError != None:
+				onError()
 
 	def play(self):
 		self.mixer.music.play()
@@ -187,3 +204,12 @@ class Track:
 
 	def __current_milli_time(self):
 		return int(round(time.time() * 1000))
+
+	def shouldEnd(self):
+		data = self.playbackInfo()
+		current = data.get('playback').get('position').get('millis')
+		total = data.get('playback').get('total').get('millis')
+
+		if current >= total or current == -1:
+			return True
+		return False

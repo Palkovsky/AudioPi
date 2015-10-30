@@ -13,20 +13,29 @@ class Playlist:
 		self.tracks = tracks
 		self.threadCount = len(tracks)
 
-	def play(self, position = 0):
+	def play(self, position = 0, onError = None):
 		if len(self.tracks) > 0 and len(self.tracks) > position:
 			self.position = position
-			self.currentTrack = Track(self.tracks[self.position])
+			if onError == None:
+				self.currentTrack = Track(self.tracks[self.position])
+			else:
+				self.currentTrack = Track(self.tracks[self.position], onError)
 			self.currentTrack.setVolume(self.volume)
 			self.currentTrack.play()
 		else:
 			raise IndexError('Wrong track position')
 
-	def nextTrack(self):
-		self.play(self.position + 1)
+	def nextTrack(self, onError = None):
+		if onError != None:
+			self.play(self.position + 1, onError)
+		else:
+			self.play(self.position + 1)
 
-	def previousTrack(self):
-		self.play(self.position - 1)
+	def previousTrack(self, onError = None):
+		if onError != None:
+			self.play(self.position - 1, onError)
+		else:
+			self.play(self.position - 1)
 
 	def nextTrackAvilable(self):
 		if len(self.tracks) > self.position + 1:

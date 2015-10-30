@@ -5,7 +5,7 @@ from constants import error_codes, params
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
 from helpers import check_boolean, check_string, check_integer, check_float, check_string_array, isNull
-from helpers import send_playlist_play_error, get_defaults
+from helpers import send_playlist_play_error, get_defaults, file_exsists, send_no_file_error
 from threader import TrackThreader, PlaylistThreader
 from settings import volumizer
 from explore import Explorer
@@ -24,6 +24,9 @@ def play_track():
 
 	trackPath = check_string(request, params.PATH)
 	terminate = check_boolean(request, params.TERMINATE)
+
+	if not file_exsists(trackPath):
+		return send_no_file_error(trackPath)
 
 	if currentTrack == None:
 		return startTrack(trackPath)
@@ -147,9 +150,9 @@ def play_playlist():
 def playlist_next():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
-	if currentPlaylist != None:
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
 		if currentPlaylist.nextTrackAvilable():
-			currentPlaylist.nextTrack()
+			currentPlaylist.nextTrack(onPlaylistLoadError)
 			return send_state_playlist_message(currentPlaylist, "Track succesfully changed")
 		else:
 			return send_error(error_codes.NO_NEXT_TRACK, "No next track avilable")
@@ -161,15 +164,14 @@ def playlist_next():
 def playlist_prev():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
-	if currentPlaylist != None:
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
 		if currentPlaylist.prevTrackAvilable():
-			currentPlaylist.previousTrack()
+			currentPlaylist.previousTrack(onPlaylistLoadError)
 			return send_state_playlist_message(currentPlaylist, "Track succesfully changed")
 		else:
 			return send_error(error_codes.NO_PREV_TRACK, "No previous track avilable")
 	else:
 		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
-
 
 
 @app.route('/playlist/rewind', methods=['GET', 'POST'])
@@ -215,7 +217,7 @@ def playlist_rewind():
 def playlist_pos():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
-	if currentPlaylist != None:
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
 		index = check_integer(request, params.INDEX)
 
 		if index == None or not is_valid_num(0, len(currentPlaylist.tracks) - 1, index):
@@ -230,7 +232,7 @@ def playlist_pos():
 def playlist_playback():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
-	if currentPlaylist != None:
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
 		return jsonify(currentPlaylist.playbackInfo(error_codes.SUCCESFULL_QUERY))
 	else:
 		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
@@ -240,7 +242,7 @@ def playlist_playback():
 def playlist_pause():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
-	if currentPlaylist != None:
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
 		currentTrack = currentPlaylist.currentTrack
 
 		if(currentTrack == None):
@@ -259,7 +261,7 @@ def playlist_pause():
 def playlist_unpause():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
-	if currentPlaylist != None:
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
 		currentTrack = currentPlaylist.currentTrack
 
 		if(currentTrack == None):
@@ -277,7 +279,7 @@ def playlist_unpause():
 def stop_playlist():
 	currentPlaylist = playlistThreader.currentPlaylist()
 
-	if currentPlaylist != None:
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
 		currentPlaylist.stop()
 		playlistThreader.setPlaylist(None)
 
@@ -377,6 +379,11 @@ def startPlaylist(tracks, defaultPosition = 0):
 
 		return send_state_playlist_message(currentPlaylist, "Playlist succesfully started", None, 1, False)
 
+
+def onPlaylistLoadError():
+	playlistThreader.setPlaylist(None)	
+
+	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
     app.run(debug=True)

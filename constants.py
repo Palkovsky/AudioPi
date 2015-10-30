@@ -32,11 +32,13 @@ class ErrorGlobals():
 		#Paths
 		self.PATH_EMPTY = 1100
 		self.INVALID_PATH = 1101
+		self.FILE_NOT_EXSISTS = 1102
+
+		self.UNDEFINED = 111
 		
 class ParamGlobals():
 
 	def __init__(self):
-		self.PATH = "p"
 		self.TERMINATE = "t"
 		self.VALUE = "value"
 		self.POSITION = "pos"

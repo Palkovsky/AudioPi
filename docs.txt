@@ -20,5 +20,12 @@
 /data [POST, GET]
 	-path = path to explore
 
+/volume [GET]
+	Gets current volume
+
+/volume [POST]
+	Sets current volume
+	-value
+
 TO DO:
 	-exception handling with not exsiting tracks

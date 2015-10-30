@@ -20,7 +20,7 @@ class TrackThreader():
 	
 	#This makes track to disapear after it's done playing
 	def __oversee_track(self, track):
-		while track.isBusy():
+		while track.isBusy() and not track.shouldEnd():
 			continue
 		if(self.onEndCustomCallback == None):
 			if(self.track != None):
