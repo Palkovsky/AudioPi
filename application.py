@@ -9,8 +9,6 @@ from helpers import send_playlist_play_error, get_defaults, file_exsists, send_n
 from threader import TrackThreader, PlaylistThreader
 from settings import volumizer
 from explore import Explorer
-
-
 import os
 
 app = Flask(__name__)
@@ -335,6 +333,17 @@ def getAllTracks():
 
 	return jsonify(respone)
 
+@app.route('/all_playlists', methods = ['GET'])
+def getAllPlaylists():
+
+	filtr = check_integer(request, params.FILTER)
+	if filtr == None:
+		filtr = 0
+
+	respone = explorer.getAllPlaylists(filtr)
+	respone['code'] = error_codes.SUCCESFULL_QUERY
+
+	return jsonify(respone)
 
 @app.route('/defaults', methods = ['GET'])
 def defaults():

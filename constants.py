@@ -47,13 +47,24 @@ class ParamGlobals():
 
 		self.TRACK = "track"
 		self.PATH = "path"
+		self.FILTER = "filter"
 
 class Defaults():
 	def __init__(self):
 		self.path = '/media/' + getpass.getuser()
 
+class PlaylistFilters():
+	
+	def __init__(self):
+		self.NO_FILTERING = 0
+		self.ALBUMS_ONLY = 1
+		self.ARTISTS_ONLY = 2
+		self.ARTISTS_AND_ALBUMS = 3
+		self.UNKNOWN_ONLY = 4
+
 
 error_codes = ErrorGlobals()
 params = ParamGlobals()
 defaults = Defaults()
+playlist_filters = PlaylistFilters()
 whitelisted_extensions = ['.flac', '.mp3', '.ogg']
