@@ -56,4 +56,4 @@ class Defaults():
 error_codes = ErrorGlobals()
 params = ParamGlobals()
 defaults = Defaults()
-whitelisted_extensions = ['.flac', '.mp3']
+whitelisted_extensions = ['.flac', '.mp3', '.ogg']

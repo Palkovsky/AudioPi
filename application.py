@@ -326,6 +326,16 @@ def getDirectory():
 	respone['code'] = error_codes.SUCCESFULL_QUERY
 	return jsonify(respone)
 
+#Gets all tracks on file system(may be unefficient)
+@app.route('/all_tracks', methods = ['GET'])
+def getAllTracks():
+
+	respone = explorer.getAllTracks()
+	respone['code'] = error_codes.SUCCESFULL_QUERY
+
+	return jsonify(respone)
+
+
 @app.route('/defaults', methods = ['GET'])
 def defaults():
 	return jsonify(get_defaults())

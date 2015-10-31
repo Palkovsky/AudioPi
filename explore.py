@@ -25,8 +25,8 @@ class Explorer():
 
 		for directory in self.__get_immediate_subdirectories(path):
 			if directory[0] != ".":
-				directories_list.append({ "directory" : {"relative" : directory,
-														"full" : os.path.join(path, directory)}})
+				directories_list.append({"relative" : directory,
+										"full" : os.path.join(path, directory)})
 
 		files_list = []
 		files = []
@@ -36,11 +36,11 @@ class Explorer():
 
 		for f in files:
 			basename = os.path.basename(f)
-			files_list.append({"file" : {
+			files_list.append({
 					"relative" : basename,
 					"full" : f,
 					"simple" : os.path.splitext(basename)[0]
-		}})
+			})
 
 
 		upDir = os.path.dirname(path)
@@ -53,8 +53,26 @@ class Explorer():
 				"path" : path,
 				"upDir" : upDir,
 				"directories" : directories_list,
-				"files" : files_list
+				"tracks" : files_list
 			}
+		}
+
+	def getAllTracks(self):
+
+		files_list = []
+
+		for dirpath, dirnames, filenames in os.walk(self.__default_path):
+			for filename in [f for f in filenames if self.__isWhitelisted(f)]:
+				fullPath = os.path.join(dirpath, filename)
+				basename = os.path.basename(fullPath)
+				files_list.append({
+					"basename" : basename,
+					"full" : fullPath,
+					"simple" : os.path.splitext(basename)[0]
+				})
+
+		return {
+			"tracks" : files_list
 		}
 
 
@@ -66,3 +84,14 @@ class Explorer():
 		if path.endswith('/'):
 			return path[:-1]
 		return path
+
+	def __isWhitelisted(self, path):
+		for ext in whitelisted_extensions:
+			if os.path.splitext(path)[1] == ext:
+				return True
+		return False
+
+	def __getCover(self, file_path):
+		path = self.__path_leaf(file_path)
+
+		return None

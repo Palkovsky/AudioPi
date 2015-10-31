@@ -4,6 +4,7 @@ import math
 import time
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
+from mutagen.oggvorbis import OggVorbis
 from settings import volumizer
 import ntpath
 import os
@@ -171,6 +172,8 @@ class Track:
 			audio = MP3(self.trackPath)
 		elif self.extension == ".flac":
 			audio = FLAC(self.trackPath)
+		elif self.extension == ".ogg":
+			audio = OggVorbis(self.trackPath)
 		return audio.info.length * 1000
 
 	def __getMetadata(self):
@@ -185,6 +188,8 @@ class Track:
 			audio = MP3(self.getPath())
 		elif(self.extension == ".flac"):
 			audio = FLAC(self.getPath())
+		elif(self.extension == ".ogg"):
+			audio = OggVorbis(self.getPath())
 
 		artistName = audio['artist'][0] if 'artist' in audio  else artistName
 		albumName = audio['album'][0] if 'album' in audio else albumName
