@@ -17,6 +17,8 @@ class Track:
 		self.extension = self.__getExtension(self.trackPath)
 		self.mixer.init()
 		self.setVolume(volume)
+		self.__beforePaused = -1
+
 		if onError != None:
 			self.loadTrack(path, onError)
 		else:
@@ -54,10 +56,13 @@ class Track:
 		self.mixer.music.stop()
 
 	def pause(self):
+		self.__beforePaused = self.getPlaybackPosition()
 		self.paused = True
 		self.mixer.music.pause()
 
 	def unpause(self):
+		self.setPlaybackPosition(round(self.__beforePaused/1000))
+		self.__beforePaused = -1
 		self.paused = False
 		self.mixer.music.unpause()
 

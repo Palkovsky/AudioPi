@@ -20,7 +20,8 @@ class TrackThreader():
 	
 	#This makes track to disapear after it's done playing
 	def __oversee_track(self, track):
-		while track.isBusy() and not track.shouldEnd():
+		while (track.isBusy() or track.isPaused()) and not track.shouldEnd():
+			print("Playback: " + str(track.playbackInfo().get('playback').get('position').get('secs')))
 			continue
 		if(self.onEndCustomCallback == None):
 			if(self.track != None):
