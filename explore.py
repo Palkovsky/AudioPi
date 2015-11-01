@@ -11,6 +11,7 @@ class Explorer():
 		self.__PLAYLIST_TYPE_ARTIST = "artist"
 		self.__PLAYLIST_TYPE_ALBUM = "album"
 		self.__PLAYLIST_TYPE_GENRE = "genre"
+		self.__PLAYLIST_TYPE_ALL = "all"
 		self.__UNDEFINED_PLAYLIST_TYPE = "Unknown"
 
 		f = playlist_filters
@@ -19,9 +20,10 @@ class Explorer():
 		self.__ALBUMS_ALLOWED_FILTERS = [f.NO_FILTERING, f.ALBUMS_ONLY]
 		self.__GENRES_ALLOWED_FILTERS = [f.NO_FILTERING, f.GENRES_ONLY]
 		self.__UNDEFINED_ALLOWED_FILTERS = [f.NO_FILTERING, f.UNKNOWN_ONLY]
+		self.__ALL_ALLOWED_FILTERS = [f.INCLUDE_ALL]
 
 		self.__filters = [f.NO_FILTERING, f.ARTISTS_ONLY, f.ALBUMS_ONLY, f.GENRES_ONLY,
-						f.UNKNOWN_ONLY]
+						f.UNKNOWN_ONLY, f.INCLUDE_ALL]
 
 	def getPathContent(self, path):
 
@@ -173,6 +175,9 @@ class Explorer():
 			if album == None and artist == None and genre == None and self.__isAllowed(self.__UNDEFINED_PLAYLIST_TYPE, filt):
 				self.__addTrack(playlists, self.__UNDEFINED_PLAYLIST_TYPE, trackInfo, self.__UNDEFINED_PLAYLIST_TYPE)
 
+			#all
+			if self.__isAllowed(self.__PLAYLIST_TYPE_ALL, filt):
+				self.__addTrack(playlists, self.__PLAYLIST_TYPE_ALL, trackInfo, self.__PLAYLIST_TYPE_ALL)
 
 		return {"playlists" : playlists}
 
@@ -237,6 +242,9 @@ class Explorer():
 
 		elif type == self.__UNDEFINED_PLAYLIST_TYPE:
 			return self.__UNDEFINED_ALLOWED_FILTERS
+
+		elif type == self.__PLAYLIST_TYPE_ALL:
+			return self.__ALL_ALLOWED_FILTERS
 
 		return None
 

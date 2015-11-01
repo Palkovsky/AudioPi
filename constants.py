@@ -61,7 +61,7 @@ class PlaylistFilters():
 		self.ARTISTS_ONLY = 2
 		self.GENRES_ONLY = 3
 		self.UNKNOWN_ONLY = 4
-
+		self.INCLUDE_ALL = 5
 
 error_codes = ErrorGlobals()
 params = ParamGlobals()

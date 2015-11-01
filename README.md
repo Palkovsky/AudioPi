@@ -42,11 +42,14 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 
 	If you've passed NO_FILTERING[0] other filter values are ignored.
 
+	INCLUDE_ALL is as default disabled, it append to response all tracks as playlist.
+
 	NO_FILTERING = 0
 	ALBUMS_ONLY = 1
 	ARTISTS_ONLY = 2
 	GENRES_ONLY = 3
 	UNKNOWN_ONLY = 4
+	INCLUDE_ALL = 5
 	//Unknown is playlist containg tracks without artist and album(from ID3 tag, ofc)
 
 TO DO:
