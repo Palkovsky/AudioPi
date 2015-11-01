@@ -1,8 +1,8 @@
 from flask import jsonify
 from constants import whitelisted_extensions, error_codes, defaults
 from settings import volumizer
-import os
 from pygame import mixer
+import os
 
 def get_defaults(response_code = error_codes.SUCCESFULL_QUERY):
 	response = {
@@ -131,6 +131,24 @@ def check_string_array(request, field):
 		return request.form.getlist(field)
 	else:
 		return request.args.getlist(field)
+
+def check_int_array(request, field):
+	if request.method == 'POST':
+		data = request.form.getlist(field, type = int)
+	else:
+		data = request.args.getlist(field)
+
+	data_copy = data
+	int_array = []
+
+	for integer in data_copy:
+		try:
+			i = int(integer)
+			int_array.append(i)
+		except:
+			pass
+
+	return int_array	
 
 def isNull(object):
 	if object == None:

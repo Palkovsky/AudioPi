@@ -5,6 +5,7 @@ from constants import error_codes, params
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
 from helpers import check_boolean, check_string, check_integer, check_float, check_string_array, isNull
+from helpers import check_int_array
 from helpers import send_playlist_play_error, get_defaults, file_exsists, send_no_file_error, flush_stream
 from threader import TrackThreader, PlaylistThreader
 from settings import volumizer
@@ -336,11 +337,11 @@ def getAllTracks():
 @app.route('/all_playlists', methods = ['GET'])
 def getAllPlaylists():
 
-	filtr = check_integer(request, params.FILTER)
-	if filtr == None:
-		filtr = 0
+	filters = check_int_array(request, params.FILTER)
+	if len(filters) == 0:
+		filters.append(0) #0 means no filtering
 
-	respone = explorer.getAllPlaylists(filtr)
+	respone = explorer.getAllPlaylists(filters)
 	respone['code'] = error_codes.SUCCESFULL_QUERY
 
 	return jsonify(respone)

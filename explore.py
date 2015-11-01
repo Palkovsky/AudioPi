@@ -7,12 +7,21 @@ class Explorer():
 
 	def __init__(self):
 		self.__default_path = defaults.path
+
 		self.__PLAYLIST_TYPE_ARTIST = "artist"
 		self.__PLAYLIST_TYPE_ALBUM = "album"
-		self.__UNDEFINED_PLAYLIST_NAME = "Unknown"
-		self.__filters = [playlist_filters.NO_FILTERING, playlist_filters.ARTISTS_ONLY,
-						playlist_filters.ALBUMS_ONLY, playlist_filters.ARTISTS_AND_ALBUMS,
-						playlist_filters.UNKNOWN_ONLY]
+		self.__PLAYLIST_TYPE_GENRE = "genre"
+		self.__UNDEFINED_PLAYLIST_TYPE = "Unknown"
+
+		f = playlist_filters
+
+		self.__ARTISTS_ALLOWED_FILTERS = [f.NO_FILTERING, f.ARTISTS_ONLY]
+		self.__ALBUMS_ALLOWED_FILTERS = [f.NO_FILTERING, f.ALBUMS_ONLY]
+		self.__GENRES_ALLOWED_FILTERS = [f.NO_FILTERING, f.GENRES_ONLY]
+		self.__UNDEFINED_ALLOWED_FILTERS = [f.NO_FILTERING, f.UNKNOWN_ONLY]
+
+		self.__filters = [f.NO_FILTERING, f.ARTISTS_ONLY, f.ALBUMS_ONLY, f.GENRES_ONLY,
+						f.UNKNOWN_ONLY]
 
 	def getPathContent(self, path):
 
@@ -76,13 +85,15 @@ class Explorer():
 					f = File(fullPath)
 					artist = f['artist'][0] if 'artist' in f else None
 					album = f['album'][0] if 'album' in f else None
+					genre = f['genre'][0] if 'genre' in f else None
 	
 					files_list.append({
 						"basename" : basename,
 						"full" : fullPath,
 						"simple" : os.path.splitext(basename)[0],
 						"artist" : artist,
-						"album" : album
+						"album" : album,
+						"genre" : genre
 					})
 
 				else:
@@ -98,7 +109,7 @@ class Explorer():
 		}
 
 	#Getting playlists via id3 tags
-	def getAllPlaylists(self, filt = playlist_filters.NO_FILTERING):
+	def getAllPlaylists(self, filt = [playlist_filters.NO_FILTERING]):
 
 		#Apply filters like:
 		'''
@@ -108,12 +119,17 @@ class Explorer():
 			- no unknown
 		'''
 
-		if not filt in self.__filters:
-			filt = 0
+		if len(filt) <= 0:
+			filt.append(playlist_filters.NO_FILTERING)
+
+		for i in range(len(filt) - 1):
+			if not filt[i] in self.__filters:
+				filt[i] = playlist_filters.NO_FILTERING
 
 		playlists = []
 		albums = []
 		artists = []
+		genres = []
 		tracks = self.getAllTracks(True)['tracks']
 
 		for track in tracks:
@@ -122,6 +138,7 @@ class Explorer():
 
 			artist = f['artist'][0] if 'artist' in f else None
 			album = f['album'][0] if 'album' in f else None
+			genre = f['genre'][0] if 'genre' in f else None
 
 			if not artist in artists and artist != None:
 				artists.append(artist)
@@ -129,62 +146,32 @@ class Explorer():
 			if not album in albums and album != None:
 				albums.append(album)
 
-			playlistsExsists = False
+			if not genre in genres and genre != None:
+				genres.append(genre)
+
+			trackInfo = {
+				"path" : track,
+				"artist" : artist,
+				"album" : album,
+				"genre" : genre
+			}
+
 			#By artist
-			if artist != None and (filt == playlist_filters.NO_FILTERING 
-				or filt == playlist_filters.ARTISTS_ONLY or filt == playlist_filters.ARTISTS_AND_ALBUMS):
-				for index, playlist in enumerate(playlists):
-					if playlist['name'] == artist and playlist['type'] == self.__PLAYLIST_TYPE_ARTIST:
-						playlist['tracks'].append(track)
-						playlistsExsists = True
-						break
+			if artist != None and self.__isAllowed(self.__PLAYLIST_TYPE_ARTIST, filt):
+				self.__addTrack(playlists, artist, trackInfo, self.__PLAYLIST_TYPE_ARTIST)
 
-				if len(playlists) == 0 or not playlistsExsists:
-					playlists.append({
-						"name" : artist,
-						"artist" : artist,
-						"album" : album,
-						"type" : self.__PLAYLIST_TYPE_ARTIST,
-						"tracks" : [track]
-					})
-
-			playlistsExsists = False
 
 			#By album
-			if album != None and (filt == playlist_filters.NO_FILTERING or filt == playlist_filters.ALBUMS_ONLY 
-				or filt == playlist_filters.ARTISTS_AND_ALBUMS):
-				for index, playlist in enumerate(playlists):
-					if playlist['name'] == album and playlist['type'] == self.__PLAYLIST_TYPE_ALBUM:
-						playlist['tracks'].append(track)
-						playlistsExsists = True
-						break
+			if album != None and self.__isAllowed(self.__PLAYLIST_TYPE_ALBUM, filt):
+				self.__addTrack(playlists, album, trackInfo, self.__PLAYLIST_TYPE_ALBUM)
 
-				if len(playlists) == 0 or not playlistsExsists:
-					playlists.append({
-						"name" : album,
-						"artist" : artist,
-						"album" : album,
-						"type" : self.__PLAYLIST_TYPE_ALBUM,
-						"tracks" : [track]
-					})
+			#By genre
+			if genre != None and self.__isAllowed(self.__PLAYLIST_TYPE_GENRE, filt):
+				self.__addTrack(playlists, genre, trackInfo, self.__PLAYLIST_TYPE_GENRE)
 
 			#Unknown
-			if album == None and artist == None and (filt == playlist_filters.NO_FILTERING 
-				or filt == playlist_filters.UNKNOWN_ONLY):
-				for index, playlist in enumerate(playlists):
-					if playlist['name'] == self.__UNDEFINED_PLAYLIST_NAME and playlist['type'] == None:
-						playlist['tracks'].append(track)
-						playlistsExsists = True
-						break
-
-				if len(playlists) == 0 or not playlistsExsists:
-					playlists.append({
-						"name" : self.__UNDEFINED_PLAYLIST_NAME,
-						"artist" : None,
-						"album" : None,
-						"type" : None,
-						"tracks" : [track]
-					})
+			if album == None and artist == None and genre == None and self.__isAllowed(self.__UNDEFINED_PLAYLIST_TYPE, filt):
+				self.__addTrack(playlists, self.__UNDEFINED_PLAYLIST_TYPE, trackInfo, self.__UNDEFINED_PLAYLIST_TYPE)
 
 
 		return {"playlists" : playlists}
@@ -222,3 +209,59 @@ class Explorer():
 		'''
 
 		return None
+
+	def __isAllowed(self, type, filters):
+
+		allowedFilters = self.__getFilteringTable(type)
+
+		if allowedFilters == None:
+			return False
+
+		allow = False
+		for filter in allowedFilters:
+			if filter in filters:
+				allow = True
+
+		return allow
+
+	def __getFilteringTable(self, type):
+
+		if type == self.__PLAYLIST_TYPE_ARTIST:
+			return self.__ARTISTS_ALLOWED_FILTERS
+
+		elif type == self.__PLAYLIST_TYPE_ALBUM:
+			return self.__ALBUMS_ALLOWED_FILTERS
+
+		elif type == self.__PLAYLIST_TYPE_GENRE:
+			return self.__GENRES_ALLOWED_FILTERS
+
+		elif type == self.__UNDEFINED_PLAYLIST_TYPE:
+			return self.__UNDEFINED_ALLOWED_FILTERS
+
+		return None
+
+
+	def __addTrack(self, playlists, name, info, typ):
+		playlistsExsists = False
+		track = info['path']
+		genre = info['genre']
+		artist = info['artist']
+		album = info['album']
+
+		for index, playlist in enumerate(playlists):
+			if playlist['name'] == name and playlist['type'] == typ:
+				playlist['tracks'].append(track)
+				playlistsExsists = True
+				break
+
+		if len(playlists) == 0 or not playlistsExsists:
+			playlists.append({
+				"name" : name,
+				"artist" : artist,
+				"album" : album,
+				"genre" : genre,
+				"type" : typ,
+				"tracks" : [track]
+		})
+
+		return playlists

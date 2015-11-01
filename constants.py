@@ -59,7 +59,7 @@ class PlaylistFilters():
 		self.NO_FILTERING = 0
 		self.ALBUMS_ONLY = 1
 		self.ARTISTS_ONLY = 2
-		self.ARTISTS_AND_ALBUMS = 3
+		self.GENRES_ONLY = 3
 		self.UNKNOWN_ONLY = 4
 
 
