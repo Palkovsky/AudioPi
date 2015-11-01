@@ -83,8 +83,8 @@ class Explorer():
 				fullPath = os.path.join(dirpath, filename)
 				basename = os.path.basename(fullPath)
 
+				f = File(fullPath)
 				if not simple:
-					f = File(fullPath)
 					artist = f['artist'][0] if 'artist' in f else None
 					album = f['album'][0] if 'album' in f else None
 					genre = f['genre'][0] if 'genre' in f else None
@@ -95,7 +95,8 @@ class Explorer():
 						"simple" : os.path.splitext(basename)[0],
 						"artist" : artist,
 						"album" : album,
-						"genre" : genre
+						"genre" : genre,
+						"length" : round(f.info.length)
 					})
 
 				else:
@@ -104,6 +105,7 @@ class Explorer():
 						"basename" : basename,
 						"full" : fullPath,
 						"simple" : os.path.splitext(basename)[0],
+						"length" : round(f.info.length)
 					})					
 
 		return {
@@ -180,6 +182,7 @@ class Explorer():
 				self.__addTrack(playlists, self.__PLAYLIST_TYPE_ALL, trackInfo, self.__PLAYLIST_TYPE_ALL)
 
 		return {"playlists" : playlists}
+
 
 
 	def __get_immediate_subdirectories(self, a_dir):

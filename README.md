@@ -32,6 +32,8 @@ Little project, which will allow to control Raspberry Pi over Internet.
 
 Gets all tracks on the filesystem
 /all_tracks [GET]
+	-simple - boolean - default FALSE. Provides more information about tracks if FALSE, but with
+						TRUE feed is a little bit lighter
 
 This action gets all tracks on the filesystem and arranges them into playlists via ID3 tags
 /all_playlists [GET]

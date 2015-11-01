@@ -329,7 +329,9 @@ def getDirectory():
 @app.route('/all_tracks', methods = ['GET'])
 def getAllTracks():
 
-	respone = explorer.getAllTracks()
+	simple = check_boolean(request, "simple")
+
+	respone = explorer.getAllTracks(simple)
 	respone['code'] = error_codes.SUCCESFULL_QUERY
 
 	return jsonify(respone)
