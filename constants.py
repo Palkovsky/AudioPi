@@ -48,6 +48,7 @@ class ParamGlobals():
 		self.TRACK = "track"
 		self.PATH = "path"
 		self.FILTER = "filter"
+		self.SIMPLE = "simple"
 
 class Defaults():
 	def __init__(self):

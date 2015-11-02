@@ -329,9 +329,16 @@ def getDirectory():
 @app.route('/all_tracks', methods = ['GET'])
 def getAllTracks():
 
-	simple = check_boolean(request, "simple")
+	simple = check_boolean(request, params.SIMPLE)
+	initialPath = check_string(request, params.PATH)
 
-	respone = explorer.getAllTracks(simple)
+	if initialPath == None:
+		initialPath = get_defaults()["defaults"]["default_path"]
+
+	if not os.path.isdir(initialPath):
+		return send_error(error_codes.INVALID_PATH, "Invalid path")
+
+	respone = explorer.getAllTracks(initialPath, simple)
 	respone['code'] = error_codes.SUCCESFULL_QUERY
 
 	return jsonify(respone)
@@ -343,7 +350,15 @@ def getAllPlaylists():
 	if len(filters) == 0:
 		filters.append(0) #0 means no filtering
 
-	respone = explorer.getAllPlaylists(filters)
+	initialPath = check_string(request, params.PATH)
+
+	if initialPath == None:
+		initialPath = get_defaults()["defaults"]["default_path"]
+
+	if not os.path.isdir(initialPath):
+		return send_error(error_codes.INVALID_PATH, "Invalid path")
+
+	respone = explorer.getAllPlaylists(initialPath, filters)
 	respone['code'] = error_codes.SUCCESFULL_QUERY
 
 	return jsonify(respone)

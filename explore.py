@@ -74,11 +74,11 @@ class Explorer():
 			}
 		}
 
-	def getAllTracks(self, simple = False):
+	def getAllTracks(self, initialPath, simple = False):
 
 		files_list = []
 
-		for dirpath, dirnames, filenames in os.walk(self.__default_path):
+		for dirpath, dirnames, filenames in os.walk(initialPath):
 			for filename in [f for f in filenames if self.__isWhitelisted(f)]:
 				fullPath = os.path.join(dirpath, filename)
 				basename = os.path.basename(fullPath)
@@ -113,7 +113,7 @@ class Explorer():
 		}
 
 	#Getting playlists via id3 tags
-	def getAllPlaylists(self, filt = [playlist_filters.NO_FILTERING]):
+	def getAllPlaylists(self, initialPath, filt = [playlist_filters.NO_FILTERING]):
 
 		#Apply filters like:
 		'''
@@ -134,7 +134,7 @@ class Explorer():
 		albums = []
 		artists = []
 		genres = []
-		tracks = self.getAllTracks(True)['tracks']
+		tracks = self.getAllTracks(initialPath, True)['tracks']
 
 		for track in tracks:
 			path = track['full']

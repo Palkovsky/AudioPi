@@ -5,6 +5,7 @@ import time
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
 from mutagen.oggvorbis import OggVorbis
+from mutagen import File
 from settings import volumizer
 import ntpath
 import os
@@ -167,14 +168,7 @@ class Track:
 		return volumizer.isMuted()
 
 	def __getLength(self):
-		audio = None
-		if self.extension == ".mp3":
-			audio = MP3(self.trackPath)
-		elif self.extension == ".flac":
-			audio = FLAC(self.trackPath)
-		elif self.extension == ".ogg":
-			audio = OggVorbis(self.trackPath)
-		return audio.info.length * 1000
+		return File(self.trackPath).info.length * 1000
 
 	def __getMetadata(self):
 
