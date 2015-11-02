@@ -88,6 +88,7 @@ class Explorer():
 					artist = f['artist'][0] if 'artist' in f else None
 					album = f['album'][0] if 'album' in f else None
 					genre = f['genre'][0] if 'genre' in f else None
+					cover = self.__getCover(fullPath)
 	
 					files_list.append({
 						"basename" : basename,
@@ -96,6 +97,7 @@ class Explorer():
 						"artist" : artist,
 						"album" : album,
 						"genre" : genre,
+						"cover" : cover,
 						"length" : round(f.info.length)
 					})
 
@@ -157,7 +159,8 @@ class Explorer():
 				"path" : track,
 				"artist" : artist,
 				"album" : album,
-				"genre" : genre
+				"genre" : genre,
+				"cover" : self.__getCover(path)
 			}
 
 			#By artist
@@ -200,23 +203,48 @@ class Explorer():
 				return True
 		return False
 
+	#This method will find and create cover of an album on device
+	#It names album arts with this pattern : [Artist] - [Album].jpg
 	def __getCover(self, file_path):
 		path = self.__path_leaf(file_path)
 		if not os.path.isfile(path) or not self.__isWhitelisted(path):
 			return None
 
 		f = File(path)
-		#artwork = f.tags['APIC:'].data if 'APIC:' in f else None
+		artist = f['artist'][0] if 'artist' in f else None
+		album = f['album'][0] if 'album' in f else None
+		cover = None
 
-		'''
-		if artwork != None:
-			artworkPath = 'resources/images/covers/' + os.path.basename(path) + '.jpg'
-			with open(artworkPath, 'wb') as img:
-				img.write(artwork) # write artwork to new image
-			return artworkPath
-		'''
+		#audio.pictures, audio['covr'] and audio['APIC:']
+		cover = f['covr'] if 'covr' in f else None
+		if cover == None:
+			cover = f['APIC:'] if 'APIC:' in f else None
+		try:
+			if cover == None:
+				cover = f.pictures[0] if len(f.pictures) > 0 else None
+		except:
+			pass
+		if cover == None:
+			return cover
 
-		return None
+		dir_path = os.path.dirname(path)
+		if artist != None and album != None:
+			cover_filename = artist + " - " + album + ".jpg"
+		elif artist == None and album != None:
+			cover_filename = album + ".jpg"
+		elif artist != None and album == None:
+			cover_filename = artist + ".jpg"
+		else:
+			cover_filename = os.path.splitext(os.path.basename(path))[0] + "_cover.jpg"
+
+		end_path = dir_path + "/" + cover_filename
+
+		if not os.path.exists(end_path): #Don't recreate it every query. Do it only when there's no jpg cover
+			picture_data = cover.data
+
+			with open(end_path, 'wb') as img:
+				img.write(picture_data)
+		return end_path
 
 	def __isAllowed(self, type, filters):
 
@@ -258,21 +286,37 @@ class Explorer():
 		genre = info['genre']
 		artist = info['artist']
 		album = info['album']
+		trackCover = info['cover']
 
 		for index, playlist in enumerate(playlists):
 			if playlist['name'] == name and playlist['type'] == typ:
+
+				if playlist['cover'] == None and trackCover != None:
+					playlist['cover'] = trackCover
+
 				playlist['tracks'].append(track)
+
+				if typ == self.__UNDEFINED_PLAYLIST_TYPE: #Add cover to tracks from undefined playlist
+					playlist['tracks'][-1]['cover'] = trackCover
+
 				playlistsExsists = True
 				break
 
 		if len(playlists) == 0 or not playlistsExsists:
-			playlists.append({
+
+			playlist = {
 				"name" : name,
 				"artist" : artist,
 				"album" : album,
 				"genre" : genre,
 				"type" : typ,
+				"cover" : trackCover,
 				"tracks" : [track]
-		})
+			}
+
+			if typ == self.__UNDEFINED_PLAYLIST_TYPE: #Add cover to tracks from undefined playlist
+				playlist['tracks'][-1]['cover'] = trackCover
+		
+			playlists.append(playlist)
 
 		return playlists

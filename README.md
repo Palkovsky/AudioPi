@@ -35,6 +35,10 @@ Gets all tracks on the filesystem
 	-simple - boolean - default FALSE. Provides more information about tracks if FALSE, but with
 						TRUE feed is a little bit lighter
 
+	-path - /all_tracks by default starts looking for playlists in your default path('/media/[username]'), then goes deaper, with
+		this argument you can choose initial path from which recursive search will be fired
+
+
 This action gets all tracks on the filesystem and arranges them into playlists via ID3 tags
 /all_playlists [GET]
 	-filter = optional argument. It's int array You pass in array values to customize your feed.
@@ -54,6 +58,7 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 	INCLUDE_ALL = 5
 	//Unknown is playlist containg tracks without artist and album(from ID3 tag, ofc)
 
-TO DO:
-	-exception handling with not exsiting tracks
-	-fix __get_cover method in explore.py
+	-path - /all_playlists by default starts looking for playlists in default path, then goes deaper, with
+			this argument you can choose initial path from which recursive search will be fired
+
+
