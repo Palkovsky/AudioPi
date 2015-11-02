@@ -114,7 +114,7 @@ class Playlist:
 
 	def shouldGoNext(self):
 		data = self.currentTrack.playbackInfo()
-		current = data.get('playback').get('position').get('millis')
+		current = self.currentTrack.getPlaybackPosition()
 		total = data.get('playback').get('total').get('millis')
 
 		if current >= total or current == -1:
