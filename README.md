@@ -62,3 +62,6 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 			this argument you can choose initial path from which recursive search will be fired
 
 
+TO DO:
+	- add /track?path=[path] to grab metadata about specific track
+	- add /track?playlist=[tracks[]] to create playlist

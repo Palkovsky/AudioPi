@@ -58,15 +58,17 @@ class Track:
 		self.mixer.music.stop()
 
 	def pause(self):
-		self.__beforePaused = self.getPlaybackPosition()
-		self.paused = True
+		self.__beforePaused = int(round(time.time() * 1000))
 		self.mixer.music.pause()
+		self.paused = True
 
+	#Best way to unpause with keeping progress is just restart and
+	#setting pos to last known pos
 	def unpause(self):
-		self.setPlaybackPosition(round(self.__beforePaused/1000))
-		self.__beforePaused = -1
+		pos = self.getPlaybackPosition()
+		self.restart()
+		self.setPlaybackPosition(round(pos/1000))		
 		self.paused = False
-		self.mixer.music.unpause()
 
 	def isPaused(self):
 		return self.paused
