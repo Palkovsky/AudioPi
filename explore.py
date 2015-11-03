@@ -1,7 +1,9 @@
 import os
 import glob
-from constants import whitelisted_extensions, defaults, playlist_filters
+import time
+from constants import whitelisted_extensions, defaults, playlist_filters, limits, error_codes
 from mutagen import File
+from helpers import send_error
 
 class Explorer():
 
@@ -77,6 +79,7 @@ class Explorer():
 	def getAllTracks(self, initialPath, simple = False):
 
 		files_list = []
+		startTime = int(round(time.time() * 1000))
 
 		for dirpath, dirnames, filenames in os.walk(initialPath):
 			for filename in [f for f in filenames if self.__isWhitelisted(f)]:
@@ -108,7 +111,11 @@ class Explorer():
 						"full" : fullPath,
 						"simple" : os.path.splitext(basename)[0],
 						"length" : round(f.info.length)
-					})					
+					})
+
+				endTime = int(round(time.time() * 1000))
+				if endTime - startTime > limits.MAX_REQUEST_TIME * 1000:
+					return send_error(error_codes.REQUEST_TIMEOUT, "Request took too much time", False)				
 
 		return {
 			"tracks" : files_list
@@ -136,7 +143,13 @@ class Explorer():
 		albums = []
 		artists = []
 		genres = []
-		tracks = self.getAllTracks(initialPath, True)['tracks']
+
+
+		response = self.getAllTracks(initialPath, True)
+		if not 'code' in response:
+			tracks = response['tracks']
+		else:
+			return response
 
 		for track in tracks:
 			path = track['full']

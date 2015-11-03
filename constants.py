@@ -1,5 +1,7 @@
 import getpass
 
+#these weird structures should be replaced with dicts
+
 class ErrorGlobals():
 
 	def __init__(self):
@@ -28,6 +30,7 @@ class ErrorGlobals():
 
 		#OTHERS
 		self.SUCCESFULL_QUERY = 999
+		self.REQUEST_TIMEOUT = 500
 
 		#Paths
 		self.PATH_EMPTY = 1100
@@ -64,8 +67,16 @@ class PlaylistFilters():
 		self.UNKNOWN_ONLY = 4
 		self.INCLUDE_ALL = 5
 
+class Limits(object):
+
+	def __init__(self):
+		self.MAX_REQUEST_TIME = 6
+
+		
+
 error_codes = ErrorGlobals()
 params = ParamGlobals()
 defaults = Defaults()
 playlist_filters = PlaylistFilters()
+limits = Limits()
 whitelisted_extensions = ['.flac', '.mp3', '.ogg']

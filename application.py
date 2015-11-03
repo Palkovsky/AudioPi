@@ -339,7 +339,9 @@ def getAllTracks():
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
 	respone = explorer.getAllTracks(initialPath, simple)
-	respone['code'] = error_codes.SUCCESFULL_QUERY
+	
+	if not 'error' in respone:
+		respone['code'] = error_codes.SUCCESFULL_QUERY
 
 	return jsonify(respone)
 
@@ -359,7 +361,9 @@ def getAllPlaylists():
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
 	respone = explorer.getAllPlaylists(initialPath, filters)
-	respone['code'] = error_codes.SUCCESFULL_QUERY
+	
+	if not 'error' in respone:
+		respone['code'] = error_codes.SUCCESFULL_QUERY
 
 	return jsonify(respone)
 

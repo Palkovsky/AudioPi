@@ -16,7 +16,6 @@ def send_error(error_code, message, json = True):
 	response = {
 					'code' : error_code,
 					'message' : message
-						
 				}
 	if json:
 		return jsonify(response)
