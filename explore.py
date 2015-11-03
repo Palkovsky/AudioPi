@@ -76,7 +76,7 @@ class Explorer():
 			}
 		}
 
-	def getAllTracks(self, initialPath, simple = False):
+	def getAllTracks(self, initialPath, sort = 1, simple = False):
 
 		files_list = []
 		startTime = int(round(time.time() * 1000))
@@ -118,11 +118,11 @@ class Explorer():
 					return send_error(error_codes.REQUEST_TIMEOUT, "Request took too much time", False)				
 
 		return {
-			"tracks" : files_list
+			"tracks" : self.__sortTracks(files_list, sort)
 		}
 
 	#Getting playlists via id3 tags
-	def getAllPlaylists(self, initialPath, filt = [playlist_filters.NO_FILTERING]):
+	def getAllPlaylists(self, initialPath, sort = 0, trackSort = 1, filt = [playlist_filters.NO_FILTERING]):
 
 		#Apply filters like:
 		'''
@@ -145,7 +145,7 @@ class Explorer():
 		genres = []
 
 
-		response = self.getAllTracks(initialPath, True)
+		response = self.getAllTracks(initialPath, trackSort, True)
 		if not 'code' in response:
 			tracks = response['tracks']
 		else:
@@ -197,7 +197,7 @@ class Explorer():
 			if self.__isAllowed(self.__PLAYLIST_TYPE_ALL, filt):
 				self.__addTrack(playlists, self.__PLAYLIST_TYPE_ALL, trackInfo, self.__PLAYLIST_TYPE_ALL)
 
-		return {"playlists" : playlists}
+		return {"playlists" : self.__sortPlaylists(playlists, sort)}
 
 
 
@@ -332,4 +332,22 @@ class Explorer():
 		
 			playlists.append(playlist)
 
+		return playlists
+
+	def __sortTracks(self, tracks, method):
+		if method == 1:
+			return sorted(tracks, key = lambda k: k['simple'])
+		elif method == 2:
+			return sorted(tracks, key = lambda k: k['length'], reverse = True)
+		elif method == 3:
+			return sorted(tracks, key = lambda k: k['simple'], reverse = True)
+		elif method == 4:
+			return sorted(tracks, key = lambda k: k['length'])
+		return tracks
+
+	def __sortPlaylists(self, playlists, method):
+		if method == 1:
+			return sorted(playlists, key = lambda k: k['name'])
+		elif method == 3:
+			return sorted(playlists, key = lambda k: k['name'], reverse = True)
 		return playlists

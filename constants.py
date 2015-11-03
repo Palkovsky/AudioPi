@@ -23,10 +23,8 @@ class ErrorGlobals():
 		self.INVALID_TRACK_INDEX = 1037
 		self.INVALID_TRACKS = 1038
 
-
 		#VOLUME
 		self.INVALID_VALUE = 1069
-
 
 		#OTHERS
 		self.SUCCESFULL_QUERY = 999
@@ -52,6 +50,8 @@ class ParamGlobals():
 		self.PATH = "path"
 		self.FILTER = "filter"
 		self.SIMPLE = "simple"
+		self.SORT = "sort"
+		self.TRACK_SORT = "tsort"
 
 class Defaults():
 	def __init__(self):
@@ -68,9 +68,9 @@ class PlaylistFilters():
 		self.INCLUDE_ALL = 5
 
 class Limits(object):
-
 	def __init__(self):
 		self.MAX_REQUEST_TIME = 6
+
 
 		
 
@@ -79,4 +79,11 @@ params = ParamGlobals()
 defaults = Defaults()
 playlist_filters = PlaylistFilters()
 limits = Limits()
+sorting_methods = [
+	{"name" : "normal", "value" : 0},
+	{"name" : "name", "value" : 1},
+	{"name" : "length", "value" : 2},
+	{"name" : "name_desc", "value" : 3},
+	{"name" : "length_asc", "value" : 4}
+]
 whitelisted_extensions = ['.flac', '.mp3', '.ogg']

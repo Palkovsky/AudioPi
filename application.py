@@ -5,7 +5,7 @@ from constants import error_codes, params
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
 from helpers import check_boolean, check_string, check_integer, check_float, check_string_array, isNull
-from helpers import check_int_array
+from helpers import check_int_array, translate_sorting_method
 from helpers import send_playlist_play_error, get_defaults, file_exsists, send_no_file_error, flush_stream
 from threader import TrackThreader, PlaylistThreader
 from settings import volumizer
@@ -326,11 +326,16 @@ def getDirectory():
 	return jsonify(respone)
 
 #Gets all tracks on file system(may be unefficient)
-@app.route('/all_tracks', methods = ['GET'])
+@app.route('/all_tracks', methods = ['GET', 'POST'])
 def getAllTracks():
 
 	simple = check_boolean(request, params.SIMPLE)
 	initialPath = check_string(request, params.PATH)
+
+	sortingMethod = check_integer(request, params.SORT)
+	if sortingMethod == None:
+		sortingMethod = check_string(request, params.SORT)
+	sortingMethod = translate_sorting_method(sortingMethod, 1)
 
 	if initialPath == None:
 		initialPath = get_defaults()["defaults"]["default_path"]
@@ -338,15 +343,25 @@ def getAllTracks():
 	if not os.path.isdir(initialPath):
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
-	respone = explorer.getAllTracks(initialPath, simple)
+	respone = explorer.getAllTracks(initialPath, sortingMethod, simple)
 	
 	if not 'error' in respone:
 		respone['code'] = error_codes.SUCCESFULL_QUERY
 
 	return jsonify(respone)
 
-@app.route('/all_playlists', methods = ['GET'])
+@app.route('/all_playlists', methods = ['GET', 'POST'])
 def getAllPlaylists():
+
+	sortingMethod = check_integer(request, params.SORT)
+	if sortingMethod == None:
+		sortingMethod = check_string(request, params.SORT)
+	sortingMethod = translate_sorting_method(sortingMethod)
+
+	trackSortingMethod = check_integer(request, params.TRACK_SORT)
+	if trackSortingMethod == None:
+		trackSortingMethod = check_string(request, params.TRACK_SORT)
+	trackSortingMethod = translate_sorting_method(trackSortingMethod, 1)
 
 	filters = check_int_array(request, params.FILTER)
 	if len(filters) == 0:
@@ -360,7 +375,7 @@ def getAllPlaylists():
 	if not os.path.isdir(initialPath):
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
-	respone = explorer.getAllPlaylists(initialPath, filters)
+	respone = explorer.getAllPlaylists(initialPath, sortingMethod, trackSortingMethod, filters)
 	
 	if not 'error' in respone:
 		respone['code'] = error_codes.SUCCESFULL_QUERY

@@ -30,6 +30,15 @@ Little project, which will allow to control Raspberry Pi over Internet.
 	Sets current volume
 	-value
 
+
+	SORTING
+	{"name" : "normal", "value" : 0},
+	{"name" : "name", "value" : 1},
+	{"name" : "length", "value" : 2},
+	{"name" : "name_desc", "value" : 3},
+	{"name" : "length_asc", "value" : 4}
+	When passing sort, tsort param you can give 'name' or 'value' value. It'll be properly parsed and served.
+
 Gets all tracks on the filesystem
 /all_tracks [GET]
 	-simple - boolean - default FALSE. Provides more information about tracks if FALSE, but with
@@ -38,6 +47,7 @@ Gets all tracks on the filesystem
 	-path - /all_tracks by default starts looking for playlists in your default path('/media/[username]'), then goes deaper, with
 		this argument you can choose initial path from which recursive search will be fired
 
+	-sort - every sorting method avilable - DEFAULT: 1
 
 This action gets all tracks on the filesystem and arranges them into playlists via ID3 tags
 /all_playlists [GET]
@@ -62,6 +72,11 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 			this argument you can choose initial path from which recursive search will be fired
 
 
+	-sort - only 1(by name) and 3(by name desc) avilable, because playlist doesn't have track length - DEFAULT: 0
+	-tsort - track sort method, every method avilable - DEFAULT: 1
+
+
 TO DO:
 	- add /track?path=[path] to grab metadata about specific track
 	- add /track?playlist=[tracks[]] to create playlist
+	- add track search functinality

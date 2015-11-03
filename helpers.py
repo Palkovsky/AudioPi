@@ -1,5 +1,5 @@
 from flask import jsonify
-from constants import whitelisted_extensions, error_codes, defaults
+from constants import whitelisted_extensions, error_codes, defaults, sorting_methods
 from settings import volumizer
 from pygame import mixer
 import os
@@ -171,3 +171,15 @@ def flush_stream():
 		mixer.music.stop()
 	except:
 		pass
+
+def translate_sorting_method(sortMethod, default = 0):
+	if isinstance(sortMethod, int):
+		if sortMethod < 0 or sortMethod >= len(sorting_methods):
+			return default
+		else:
+			return sortMethod
+	elif isinstance(sortMethod, str):
+		for method in sorting_methods:
+			if sortMethod == method["name"]:
+				return method["value"]
+	return default
