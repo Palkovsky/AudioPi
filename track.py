@@ -80,7 +80,7 @@ class Track:
 	def isPlaying(self):
 		if not self.isPaused():
 			return self.mixer.music.get_busy()
-		return int(self.isPaused == 'false')
+		return 1
 
 	def isBusy(self):
 		return self.mixer.music.get_busy()
