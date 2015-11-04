@@ -199,6 +199,22 @@ class Explorer():
 
 		return {"playlists" : self.__sortPlaylists(playlists, sort)}
 
+	def getMetadata(self, path):
+		f = File(path)
+		artist = f['artist'][0] if 'artist' in f else None
+		album = f['album'][0] if 'album' in f else None
+		genre = f['genre'][0] if 'genre' in f else None
+
+		response = {
+			"path" : path,
+ 			"artist" : artist,
+ 			"album" : album,
+ 			"genre" : genre,
+ 			"length" : round(f.info.length),
+ 			"cover" : self.__getCover(path)
+		}
+
+		return response
 
 
 	def __get_immediate_subdirectories(self, a_dir):

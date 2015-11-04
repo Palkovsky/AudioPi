@@ -69,7 +69,7 @@ class PlaylistFilters():
 
 class Limits(object):
 	def __init__(self):
-		self.MAX_REQUEST_TIME = 6
+		self.MAX_REQUEST_TIME = 36
 
 
 		

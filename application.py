@@ -382,6 +382,21 @@ def getAllPlaylists():
 
 	return jsonify(respone)
 
+@app.route('/metadata', methods = ['GET'])
+def get_metadata():
+	path = check_string(request, params.PATH)
+
+	if path == None:
+		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
+
+	if not file_exsists(path):
+		return send_no_file_error(path)
+
+	respone = explorer.getMetadata(path)
+	respone['code'] = error_codes.SUCCESFULL_QUERY
+
+	return jsonify(respone)
+
 @app.route('/defaults', methods = ['GET'])
 def defaults():
 	return jsonify(get_defaults())

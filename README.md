@@ -75,6 +75,8 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 	-sort - only 1(by name) and 3(by name desc) avilable, because playlist doesn't have track length - DEFAULT: 0
 	-tsort - track sort method, every method avilable - DEFAULT: 1
 
+/metadata [GET]
+	-path (path to audio file from which we want to export metadata)
 
 TO DO:
 	- add /track?path=[path] to grab metadata about specific track
