@@ -52,6 +52,7 @@ class ParamGlobals():
 		self.SIMPLE = "simple"
 		self.SORT = "sort"
 		self.TRACK_SORT = "tsort"
+		self.METADATA = "meta"
 
 class Defaults():
 	def __init__(self):

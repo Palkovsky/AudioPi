@@ -27,7 +27,7 @@ class Explorer():
 		self.__filters = [f.NO_FILTERING, f.ARTISTS_ONLY, f.ALBUMS_ONLY, f.GENRES_ONLY,
 						f.UNKNOWN_ONLY, f.INCLUDE_ALL]
 
-	def getPathContent(self, path):
+	def getPathContent(self, path, metadata = False):
 
 		if path == None:
 			return None
@@ -55,11 +55,19 @@ class Explorer():
 
 		for f in files:
 			basename = os.path.basename(f)
-			files_list.append({
-					"relative" : basename,
-					"full" : f,
-					"simple" : os.path.splitext(basename)[0]
-			})
+			if not metadata:
+				files_list.append({
+						"relative" : basename,
+						"full" : f,
+						"simple" : os.path.splitext(basename)[0]
+				})
+			else:
+				files_list.append({
+						"relative" : basename,
+						"full" : f,
+						"simple" : os.path.splitext(basename)[0],
+						"metadata" : self.getMetadata(f)
+				})				
 
 
 		upDir = os.path.dirname(path)

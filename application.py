@@ -318,7 +318,9 @@ def getDirectory():
 	if path == None:
 		path = get_defaults()['defaults']['default_path']
 
-	respone = explorer.getPathContent(path)
+	metadata = check_boolean(request, params.METADATA)
+
+	respone = explorer.getPathContent(path, metadata)
 	if respone == None:
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
