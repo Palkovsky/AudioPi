@@ -3,6 +3,10 @@ import glob
 import time
 from constants import whitelisted_extensions, defaults, playlist_filters, limits, error_codes
 from mutagen import File
+from mutagen.easyid3 import EasyID3
+from mutagen.flac import FLAC
+from mutagen.mp3 import MP3
+from mutagen.oggvorbis import OggVorbis
 from helpers import send_error
 
 class Explorer():
@@ -94,7 +98,7 @@ class Explorer():
 				fullPath = os.path.join(dirpath, filename)
 				basename = os.path.basename(fullPath)
 
-				f = File(fullPath)
+				f = self.__getFile(fullPath)
 				if not simple:
 					artist = f['artist'][0] if 'artist' in f else None
 					album = f['album'][0] if 'album' in f else None
@@ -161,7 +165,7 @@ class Explorer():
 
 		for track in tracks:
 			path = track['full']
-			f = File(path)
+			f = self.__getFile(path)
 
 			artist = f['artist'][0] if 'artist' in f else None
 			album = f['album'][0] if 'album' in f else None
@@ -208,7 +212,7 @@ class Explorer():
 		return {"playlists" : self.__sortPlaylists(playlists, sort)}
 
 	def getMetadata(self, path):
-		f = File(path)
+		f = self.__getFile(path)
 		artist = f['artist'][0] if 'artist' in f else None
 		album = f['album'][0] if 'album' in f else None
 		genre = f['genre'][0] if 'genre' in f else None
@@ -247,9 +251,11 @@ class Explorer():
 		if not os.path.isfile(path) or not self.__isWhitelisted(path):
 			return None
 
-		f = File(path)
+
+		f = self.__getFile(path)
 		artist = f['artist'][0] if 'artist' in f else None
 		album = f['album'][0] if 'album' in f else None
+		f = File(path)
 		cover = None
 
 		#audio.pictures, audio['covr'] and audio['APIC:']
@@ -335,24 +341,43 @@ class Explorer():
 
 				if typ == self.__UNDEFINED_PLAYLIST_TYPE: #Add cover to tracks from undefined playlist
 					playlist['tracks'][-1]['cover'] = trackCover
+					playlist['cover'] = None
 
 				playlistsExsists = True
 				break
 
 		if len(playlists) == 0 or not playlistsExsists:
 
-			playlist = {
-				"name" : name,
-				"artist" : artist,
-				"album" : album,
-				"genre" : genre,
-				"type" : typ,
-				"cover" : trackCover,
-				"tracks" : [track]
-			}
+			if typ == self.__PLAYLIST_TYPE_GENRE:
+				playlist = {
+						"name" : name,
+						"type" : typ,
+						"cover" : trackCover,
+						"tracks" : [track]
+					}
+			elif typ == self.__PLAYLIST_TYPE_ALBUM:
+				playlist = {
+						"name" : name,
+						"artist" : artist,
+						"genre" : genre,
+						"type" : typ,
+						"cover" : trackCover,
+						"tracks" : [track]
+					}
+			else:
+				playlist = {
+					"name" : name,
+					"artist" : artist,
+					"album" : album,
+					"genre" : genre,
+					"type" : typ,
+					"cover" : trackCover,
+					"tracks" : [track]
+				}
 
 			if typ == self.__UNDEFINED_PLAYLIST_TYPE: #Add cover to tracks from undefined playlist
 				playlist['tracks'][-1]['cover'] = trackCover
+				playlist['cover'] = None
 		
 			playlists.append(playlist)
 
@@ -375,3 +400,17 @@ class Explorer():
 		elif method == 3:
 			return sorted(playlists, key = lambda k: k['name'], reverse = True)
 		return playlists
+
+	def __getFile(self, path):
+		extension = os.path.splitext(os.path.basename(path))[1]
+		audio = None
+		if(extension == ".mp3"):
+			audio = MP3(path, ID3=EasyID3)
+		elif(extension == ".flac"):
+			audio = FLAC(path)
+		elif(extension == ".ogg"):
+			audio = OggVorbis(path)
+
+		if audio != None:
+			return audio
+		return None

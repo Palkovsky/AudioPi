@@ -6,6 +6,7 @@ from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
 from mutagen.oggvorbis import OggVorbis
 from mutagen import File
+from mutagen.easyid3 import EasyID3
 from settings import volumizer
 import ntpath
 import os
@@ -181,7 +182,7 @@ class Track:
 		trackLength = -1
 
 		if(self.extension == ".mp3"):
-			audio = MP3(self.getPath())
+			audio = MP3(self.getPath(), ID3=EasyID3)
 		elif(self.extension == ".flac"):
 			audio = FLAC(self.getPath())
 		elif(self.extension == ".ogg"):
