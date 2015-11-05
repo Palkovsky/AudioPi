@@ -80,7 +80,33 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 /metadata [GET]
 	-path (path to audio file from which we want to export metadata)
 
-TO DO:
-	- add /track?path=[path] to grab metadata about specific track
-	- add /track?playlist=[tracks[]] to create playlist
-	- add track search functinality
+ERROR CODES:
+		NO_TRACK = 1015
+		TRACK_ALREADY_PAUSED = 1016
+		TRACK_ALREADY_PLAYING = 1017
+		NO_PATH_DEFINED = 1018
+		WRONG_PATH_SPECIFIED = 1019
+		INVALID_TYPE = 1020
+		WRONG_PLAYBACK_POSITION = 1021
+
+		NO_PLAYLIST = 1030
+		PLAYLIST_EXSIST = 1031
+		WRONG_TRACK_INDEX = 1032
+		NO_NEXT_TRACK = 1035
+		NO_PREV_TRACK = 1036
+		INVALID_TRACK_INDEX = 1037
+		INVALID_TRACKS = 1038
+
+		#VOLUME
+		INVALID_VALUE = 1069
+
+		#OTHERS
+		SUCCESFULL_QUERY = 999
+		REQUEST_TIMEOUT = 500
+
+		#Paths
+		PATH_EMPTY = 1100
+		INVALID_PATH = 1101
+		FILE_NOT_EXSISTS = 1102
+
+		UNDEFINED = 111
