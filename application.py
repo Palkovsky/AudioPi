@@ -332,6 +332,7 @@ def getDirectory():
 def getAllTracks():
 
 	simple = check_boolean(request, params.SIMPLE)
+	local = check_boolean(request, params.LOCAL)
 	initialPath = check_string(request, params.PATH)
 
 	sortingMethod = check_integer(request, params.SORT)
@@ -345,7 +346,7 @@ def getAllTracks():
 	if not os.path.isdir(initialPath):
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
-	respone = explorer.getAllTracks(initialPath, sortingMethod, simple)
+	respone = explorer.getAllTracks(initialPath, sortingMethod, simple, local)
 	
 	if not 'error' in respone:
 		respone['code'] = error_codes.SUCCESFULL_QUERY
@@ -355,6 +356,7 @@ def getAllTracks():
 @app.route('/all_playlists', methods = ['GET', 'POST'])
 def getAllPlaylists():
 
+	local = check_boolean(request, params.LOCAL)
 	sortingMethod = check_integer(request, params.SORT)
 	if sortingMethod == None:
 		sortingMethod = check_string(request, params.SORT)
@@ -377,7 +379,7 @@ def getAllPlaylists():
 	if not os.path.isdir(initialPath):
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
-	respone = explorer.getAllPlaylists(initialPath, sortingMethod, trackSortingMethod, filters)
+	respone = explorer.getAllPlaylists(initialPath, sortingMethod, trackSortingMethod, filters, local)
 	
 	if not 'error' in respone:
 		respone['code'] = error_codes.SUCCESFULL_QUERY

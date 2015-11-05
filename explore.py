@@ -88,53 +88,88 @@ class Explorer():
 			}
 		}
 
-	def getAllTracks(self, initialPath, sort = 1, simple = False):
+	def getAllTracks(self, initialPath, sort = 1, simple = False, local = False):
 
 		files_list = []
 		startTime = int(round(time.time() * 1000))
 
-		for dirpath, dirnames, filenames in os.walk(initialPath):
-			for filename in [f for f in filenames if self.__isWhitelisted(f)]:
-				fullPath = os.path.join(dirpath, filename)
-				basename = os.path.basename(fullPath)
+		if not local:
+			for dirpath, dirnames, filenames in os.walk(initialPath):
+				for filename in [f for f in filenames if self.__isWhitelisted(f)]:
+					fullPath = os.path.join(dirpath, filename)
+					basename = os.path.basename(fullPath)
 
-				f = self.__getFile(fullPath)
-				if not simple:
-					artist = f['artist'][0] if 'artist' in f else None
-					album = f['album'][0] if 'album' in f else None
-					genre = f['genre'][0] if 'genre' in f else None
-					cover = self.__getCover(fullPath)
-	
-					files_list.append({
-						"basename" : basename,
-						"full" : fullPath,
-						"simple" : os.path.splitext(basename)[0],
-						"artist" : artist,
-						"album" : album,
-						"genre" : genre,
-						"cover" : cover,
-						"length" : round(f.info.length)
-					})
+					f = self.__getFile(fullPath)
+					if not simple:
+						artist = f['artist'][0] if 'artist' in f else None
+						album = f['album'][0] if 'album' in f else None
+						genre = f['genre'][0] if 'genre' in f else None
+						cover = self.__getCover(fullPath)
+		
+						files_list.append({
+							"basename" : basename,
+							"full" : fullPath,
+							"simple" : os.path.splitext(basename)[0],
+							"artist" : artist,
+							"album" : album,
+							"genre" : genre,
+							"cover" : cover,
+							"length" : round(f.info.length)
+						})
 
-				else:
+					else:
 
-					files_list.append({
-						"basename" : basename,
-						"full" : fullPath,
-						"simple" : os.path.splitext(basename)[0],
-						"length" : round(f.info.length)
-					})
+						files_list.append({
+							"basename" : basename,
+							"full" : fullPath,
+							"simple" : os.path.splitext(basename)[0],
+							"length" : round(f.info.length)
+						})
 
-				endTime = int(round(time.time() * 1000))
-				if endTime - startTime > limits.MAX_REQUEST_TIME * 1000:
-					return send_error(error_codes.REQUEST_TIMEOUT, "Request took too much time", False)				
+					endTime = int(round(time.time() * 1000))
+					if endTime - startTime > limits.MAX_REQUEST_TIME * 1000:
+						return send_error(error_codes.REQUEST_TIMEOUT, "Request took too much time", False)
+
+		else:
+			for fil in os.listdir(initialPath):
+				if self.__isWhitelisted(fil):
+
+					fullPath = os.path.join(initialPath, fil)
+
+					f = self.__getFile(fullPath)
+					if not simple:
+						artist = f['artist'][0] if 'artist' in f else None
+						album = f['album'][0] if 'album' in f else None
+						genre = f['genre'][0] if 'genre' in f else None
+						cover = self.__getCover(fullPath)
+		
+						files_list.append({
+							"basename" : fil,
+							"full" : fullPath,
+							"simple" : os.path.splitext(fil)[0],
+							"artist" : artist,
+							"album" : album,
+							"genre" : genre,
+							"cover" : cover,
+							"length" : round(f.info.length)
+						})
+
+					else:
+
+						files_list.append({
+							"basename" : fil,
+							"full" : fullPath,
+							"simple" : os.path.splitext(fil)[0],
+							"length" : round(f.info.length)
+						})
+
 
 		return {
 			"tracks" : self.__sortTracks(files_list, sort)
 		}
 
 	#Getting playlists via id3 tags
-	def getAllPlaylists(self, initialPath, sort = 0, trackSort = 1, filt = [playlist_filters.NO_FILTERING]):
+	def getAllPlaylists(self, initialPath, sort = 0, trackSort = 1, filt = [playlist_filters.NO_FILTERING], local = False):
 
 		#Apply filters like:
 		'''
@@ -157,7 +192,7 @@ class Explorer():
 		genres = []
 
 
-		response = self.getAllTracks(initialPath, trackSort, True)
+		response = self.getAllTracks(initialPath, trackSort, True, local = local)
 		if not 'code' in response:
 			tracks = response['tracks']
 		else:

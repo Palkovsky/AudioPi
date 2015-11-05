@@ -48,6 +48,7 @@ Gets all tracks on the filesystem
 		this argument you can choose initial path from which recursive search will be fired
 
 	-sort - every sorting method avilable - DEFAULT: 1
+	-local(bool) - if true don't scan every dir recursively
 
 This action gets all tracks on the filesystem and arranges them into playlists via ID3 tags
 /all_playlists [GET]
@@ -74,6 +75,7 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 
 	-sort - only 1(by name) and 3(by name desc) avilable, because playlist doesn't have track length - DEFAULT: 0
 	-tsort - track sort method, every method avilable - DEFAULT: 1
+	-local(bool) - if true don't scan every dir recursively
 
 /metadata [GET]
 	-path (path to audio file from which we want to export metadata)

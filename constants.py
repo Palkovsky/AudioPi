@@ -53,6 +53,7 @@ class ParamGlobals():
 		self.SORT = "sort"
 		self.TRACK_SORT = "tsort"
 		self.METADATA = "meta"
+		self.LOCAL = "local"
 
 class Defaults():
 	def __init__(self):
