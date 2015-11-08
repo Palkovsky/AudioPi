@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import request
-from flask import jsonify
+from flask import jsonify, send_from_directory
 from constants import error_codes, params
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
@@ -418,6 +418,17 @@ def flush():
 		"message" : "flushed"
 		})
 
+@app.route('/cover', methods = ['GET'])
+def send_file():
+	path = check_string(request, params.PATH)
+
+	if path == None:
+		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
+	if not file_exsists(path):
+		return send_no_file_error(path)
+
+	return send_from_directory(directory = os.path.dirname(path), filename = os.path.basename(path), mimetype='image/jpeg')
+
 #Utility methods
 def flushTrack():
 	currentTrack = trackThreader.currentTrack()
@@ -493,4 +504,4 @@ def onPlaylistLoadError():
 	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host = '0.0.0.0', debug=False)
