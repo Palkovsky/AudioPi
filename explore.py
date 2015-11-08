@@ -1,6 +1,7 @@
 import os
 import glob
 import time
+from urllib.parse import quote
 from constants import whitelisted_extensions, defaults, playlist_filters, limits, error_codes
 from mutagen import File
 from mutagen.easyid3 import EasyID3
@@ -54,8 +55,9 @@ class Explorer():
 		files_list = []
 		files = []
 
-		for ext in whitelisted_extensions:
-			files += glob.glob(path + '/*' + ext)
+		for fil in os.listdir(path):
+				if self.__isWhitelisted(fil):
+					files.append(os.path.join(path, fil))
 
 		for f in files:
 			basename = os.path.basename(f)
