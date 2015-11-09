@@ -106,6 +106,7 @@ class Explorer():
 						artist = f['artist'][0] if 'artist' in f else None
 						album = f['album'][0] if 'album' in f else None
 						genre = f['genre'][0] if 'genre' in f else None
+						filesize = round(os.stat(fullPath).st_size/1000000, 2)
 						cover = self.__getCover(fullPath)
 		
 						files_list.append({
@@ -116,6 +117,7 @@ class Explorer():
 							"album" : album,
 							"genre" : genre,
 							"cover" : cover,
+							"filesize" : filesize,
 							"length" : round(f.info.length)
 						})
 
@@ -144,6 +146,7 @@ class Explorer():
 						album = f['album'][0] if 'album' in f else None
 						genre = f['genre'][0] if 'genre' in f else None
 						cover = self.__getCover(fullPath)
+						filesize = round(os.stat(fullPath).st_size/1000000, 2)
 		
 						files_list.append({
 							"basename" : fil,
@@ -153,6 +156,7 @@ class Explorer():
 							"album" : album,
 							"genre" : genre,
 							"cover" : cover,
+							"filesize" : filesize,
 							"length" : round(f.info.length)
 						})
 
@@ -194,7 +198,7 @@ class Explorer():
 		genres = []
 
 
-		response = self.getAllTracks(initialPath, trackSort, True, local = local)
+		response = self.getAllTracks(initialPath, trackSort, False, local = local)
 		if not 'code' in response:
 			tracks = response['tracks']
 		else:
@@ -207,6 +211,7 @@ class Explorer():
 			artist = f['artist'][0] if 'artist' in f else None
 			album = f['album'][0] if 'album' in f else None
 			genre = f['genre'][0] if 'genre' in f else None
+			filesize = round(os.stat(path).st_size/1000000, 2)
 
 			if not artist in artists and artist != None:
 				artists.append(artist)
@@ -222,7 +227,8 @@ class Explorer():
 				"artist" : artist,
 				"album" : album,
 				"genre" : genre,
-				"cover" : self.__getCover(path)
+				"cover" : self.__getCover(path),
+				"filesize" : filesize
 			}
 
 			#By artist
@@ -253,6 +259,7 @@ class Explorer():
 		artist = f['artist'][0] if 'artist' in f else None
 		album = f['album'][0] if 'album' in f else None
 		genre = f['genre'][0] if 'genre' in f else None
+		filesize = round(os.stat(path).st_size/1000000, 2)
 
 		response = {
 			"path" : path,
@@ -260,7 +267,8 @@ class Explorer():
  			"album" : album,
  			"genre" : genre,
  			"length" : round(f.info.length),
- 			"cover" : self.__getCover(path)
+ 			"cover" : self.__getCover(path),
+ 			"filesize" : filesize
 		}
 
 		return response
