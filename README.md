@@ -20,8 +20,7 @@ Little project, which will allow to control Raspberry Pi over Internet.
 /playlist/rewind [POST, GET]
 	-pos
 
-/data [POST, GET]
-	-path = path to explore
+
 
 /volume [GET]
 	Gets current volume
@@ -38,6 +37,11 @@ Little project, which will allow to control Raspberry Pi over Internet.
 	{"name" : "name_desc", "value" : 3},
 	{"name" : "length_asc", "value" : 4}
 	When passing sort, tsort param you can give 'name' or 'value' value. It'll be properly parsed and served.
+
+/data [POST, GET]
+	-path = path to explore
+	-meta = get additional metadata if true
+	-sort, supports only 1 and 3
 
 Gets all tracks on the filesystem
 /all_tracks [GET]

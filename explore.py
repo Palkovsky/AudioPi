@@ -32,7 +32,7 @@ class Explorer():
 		self.__filters = [f.NO_FILTERING, f.ARTISTS_ONLY, f.ALBUMS_ONLY, f.GENRES_ONLY,
 						f.UNKNOWN_ONLY, f.INCLUDE_ALL]
 
-	def getPathContent(self, path, metadata = False):
+	def getPathContent(self, path, metadata = False, sorting = 0):
 
 		if path == None:
 			return None
@@ -80,6 +80,12 @@ class Explorer():
 		if path == self.__default_path:
 			upDir = None
 
+		if sorting == 1:
+			files_list = sorted(files_list, key = lambda k: k['relative'])
+			directories_list = sorted(directories_list, key = lambda k: k['relative'])
+		elif sorting == 3:
+			files_list = sorted(files_list, key = lambda k: k['relative'], reverse = True)
+			directories_list = sorted(directories_list, key = lambda k: k['relative'], reverse = True)
 
 		return {
 			"directory" : {

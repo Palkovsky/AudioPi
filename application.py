@@ -320,7 +320,12 @@ def getDirectory():
 
 	metadata = check_boolean(request, params.METADATA)
 
-	respone = explorer.getPathContent(path, metadata)
+	sortingMethod = check_integer(request, params.SORT)
+	if sortingMethod == None:
+		sortingMethod = check_string(request, params.SORT)
+	sortingMethod = translate_sorting_method(sortingMethod, 0)
+
+	respone = explorer.getPathContent(path, metadata, sorting = sortingMethod)
 	if respone == None:
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
