@@ -423,6 +423,7 @@ def flush():
 		"message" : "flushed"
 		})
 
+#Path for serving local images
 @app.route('/cover', methods = ['GET'])
 def send_file():
 	path = check_string(request, params.PATH)
@@ -433,6 +434,18 @@ def send_file():
 		return send_no_file_error(path)
 
 	return send_from_directory(directory = os.path.dirname(path), filename = os.path.basename(path), mimetype='image/jpeg')
+
+#Path for serving local file
+@app.route('/file', methods = ['GET'])
+def send_audio():
+	path = check_string(request, params.PATH)
+
+	if path == None:
+		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
+	if not file_exsists(path):
+		return send_no_file_error(path)
+
+	return send_from_directory(directory = os.path.dirname(path), filename = os.path.basename(path))	
 
 #Utility methods
 def flushTrack():
@@ -509,4 +522,4 @@ def onPlaylistLoadError():
 	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host = '0.0.0.0', debug=True)
