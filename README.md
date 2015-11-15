@@ -8,6 +8,10 @@ Little project, which will allow to control Raspberry Pi over Internet.
 	POST: p(path), t(terminate)
 		UP
 
+/track/smartpause | /playlist/smartpause [GET]
+	It pauses or unpauses current audio stream based on
+	current state. If audio was paused, this method would unpause it.
+
 /playlist/play [POST, GET]
 	- i(ndex) = default position
 	- tracks = array of track paths

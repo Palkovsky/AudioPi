@@ -96,6 +96,20 @@ def unpause_track():
 		currentTrack.unpause()
 		return send_state_track_message(currentTrack, "Track unpaused")
 
+@app.route('/track/smartpause')
+def smartpause_track():
+	currentTrack = trackThreader.currentTrack()
+
+	if currentTrack == None:
+		return send_error(error_codes.NO_TRACK, "No track playing")
+	
+	if currentTrack.isPaused():
+		currentTrack.unpause()
+		return send_state_track_message(currentTrack, "Track unpaused")
+	else:
+		currentTrack.pause()
+		return send_state_track_message(currentTrack, "Track paused")
+
 @app.route('/track/metadata', methods=['GET'])
 def metadata_track():
 	currentTrack = trackThreader.currentTrack()
@@ -273,7 +287,27 @@ def playlist_unpause():
 			return send_state_playlist_message(currentPlaylist, "Track unpaused")
 
 	else:
-		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")		
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")
+
+@app.route('/playlist/smartpause')
+def playlist_smartpause():
+	currentPlaylist = playlistThreader.currentPlaylist()
+
+	if currentPlaylist != None and currentPlaylist.currentTrack != None:
+		currentTrack = currentPlaylist.currentTrack
+
+		if(currentTrack == None):
+			return send_error(error_codes.NO_TRACK, "No track playing")
+
+		if currentTrack.isPaused():
+			currentTrack.unpause()
+			return send_state_playlist_message(currentPlaylist, "Track unpaused")
+		else:
+			currentTrack.pause()
+			return send_state_playlist_message(currentPlaylist, "Track paused")
+
+	else:
+		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")	
 
 @app.route('/playlist/stop')
 def stop_playlist():
@@ -510,4 +544,4 @@ def onPlaylistLoadError():
 	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', debug=True)
+    app.run(debug=True)

@@ -59,7 +59,7 @@ class Track:
 		self.mixer.music.stop()
 
 	def pause(self):
-		self.__beforePaused = int(round(time.time() * 1000))
+		self.__beforePaused = time.time() * 1000
 		self.mixer.music.pause()
 		self.paused = True
 
