@@ -59,15 +59,15 @@ def rewind_track():
 		return send_error(error_codes.WRONG_PLAYBACK_POSITION, "Wrong playback position. It should be specified with seconds")
 	else:
 
-		oldPos = currentTrack.playbackInfo().get('playback').get('position').get('secs')
-		total = currentTrack.playbackInfo().get('playback').get('total').get('secs')
+		oldPos = currentTrack.playbackInfo().get('playback').get('position').get('millis')
+		total = currentTrack.playbackInfo().get('playback').get('total').get('millis')
 		currentTrack.setPlaybackPosition(destPos)
 
 		if unpause and currentTrack.isPaused():
 			currentTrack.unpause()
 
 		return send_state_track_message(currentTrack, "Playback position succesfully changed", {
-				'newPosition' : destPos,
+				'newPosition' : destPos * 1000,
 				'oldPosition' : oldPos,
 				'total' : total
 			})
@@ -564,4 +564,4 @@ def onPlaylistLoadError():
 	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host = '0.0.0.0', debug=False, threaded = True)

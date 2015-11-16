@@ -28,6 +28,7 @@ def send_state_track_message(track, message, extra = None, response_code = error
 				'message' : message,
 				'title' : track.getMetadata().get('metadata').get('title'),
 				'path' : track.getPath(),
+				'total' : round(track.getLength()),
 				'state' : {'playing' : track.isPlaying(), 'paused' : track.isPaused(), 'muted' : volumizer.isMuted()}}
 
 	if extra != None:
