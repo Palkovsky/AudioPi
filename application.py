@@ -124,6 +124,16 @@ def playback_track():
 		return jsonify(currentTrack.playbackInfo())
 	return send_error(error_codes.NO_TRACK, "No track playing")
 
+@app.route('/track/alive')
+def alive_track():
+	currentTrack = trackThreader.currentTrack()
+	alive = currentTrack != None
+
+	return jsonify({
+			"code" : error_codes.SUCCESFULL_QUERY,
+			"state" : alive
+		})
+
 @app.route('/track/stop')
 def stop_track():
 	currentTrack = trackThreader.currentTrack()
@@ -308,6 +318,16 @@ def playlist_smartpause():
 
 	else:
 		return send_error(error_codes.NO_PLAYLIST, "Playlist doesn't exsist")	
+
+@app.route('/playlist/alive')
+def playlist_alive():
+	currentPlaylist = playlistThreader.currentPlaylist()
+	alive = currentPlaylist != None
+
+	return jsonify({
+			"code" : error_codes.SUCCESFULL_QUERY,
+			"state" : alive
+		})
 
 @app.route('/playlist/stop')
 def stop_playlist():
