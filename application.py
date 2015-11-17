@@ -121,7 +121,9 @@ def metadata_track():
 def playback_track():
 	currentTrack = trackThreader.currentTrack()
 	if(currentTrack != None):
-		return jsonify(currentTrack.playbackInfo())
+		response = currentTrack.playbackInfo()
+		response['code'] = error_codes.SUCCESFULL_QUERY
+		return jsonify(response)
 	return send_error(error_codes.NO_TRACK, "No track playing")
 
 @app.route('/track/alive')
