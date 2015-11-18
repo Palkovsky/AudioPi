@@ -57,7 +57,7 @@ class ParamGlobals():
 
 class Defaults():
 	def __init__(self):
-		self.path = '/media/' + getpass.getuser()
+		self.path = '/media'
 
 class PlaylistFilters():
 	
