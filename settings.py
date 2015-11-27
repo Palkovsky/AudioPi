@@ -35,7 +35,6 @@ class Volumizer():
 			f.write(json.dumps(json_data))
 
 
-
 		return self.getJSON()
 
 	def isMuted(self):

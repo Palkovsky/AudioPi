@@ -347,6 +347,11 @@ def stop_playlist():
 #Config API actions
 @app.route('/volume', methods = ['GET'])
 def get_volume():
+	value = check_float(request, params.VALUE)
+
+	if value != None and value != "":
+		volumizer.setVolume(value)
+
 	respone = volumizer.getJSON()
 	respone.update({"code" : error_codes.SUCCESFULL_QUERY})
 	return jsonify(respone)
