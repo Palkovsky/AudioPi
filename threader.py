@@ -12,6 +12,7 @@ class TrackThreader():
 		self.volume = volumizer.getJSON()['config']['milli']
 
 	def __play_track(self, track, callback = None):
+		self.setVolume(volumizer.getJSON()['config']['milli'])
 		if(callback == None):
 			track.play()
 		else:
@@ -57,6 +58,7 @@ class PlaylistThreader():
 		self.volume = volumizer.getJSON()['config']['milli']
 
 	def __play_playlist(self, position = 0):
+		self.setVolume(volumizer.getJSON()['config']['milli'])
 		self.playlist.play(position)
 		self.__oversee_playlist()
 
