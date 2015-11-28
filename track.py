@@ -214,7 +214,7 @@ class Track:
 
 	def shouldEnd(self):
 		current = self.getPlaybackPosition()
-		total = round(self.getLength()
+		total = round(self.getLength())
 
 		if current >= total or current == -1:
 			return True
