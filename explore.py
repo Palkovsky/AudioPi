@@ -262,20 +262,32 @@ class Explorer():
 
 	def getMetadata(self, path):
 		f = self.__getFile(path)
-		artist = f['artist'][0] if 'artist' in f else None
-		album = f['album'][0] if 'album' in f else None
-		genre = f['genre'][0] if 'genre' in f else None
+		response = {}
 		filesize = round(os.stat(path).st_size/1000000, 2)
+		try:
+			artist = f['artist'][0] if 'artist' in f else None
+			album = f['album'][0] if 'album' in f else None
+			genre = f['genre'][0] if 'genre' in f else None
 
-		response = {
-			"path" : path,
- 			"artist" : artist,
- 			"album" : album,
- 			"genre" : genre,
- 			"length" : round(f.info.length),
- 			"cover" : self.__getCover(path),
- 			"filesize" : filesize
-		}
+			response = {
+				"path" : path,
+	 			"artist" : artist,
+	 			"album" : album,
+	 			"genre" : genre,
+	 			"length" : round(f.info.length),
+	 			"cover" : self.__getCover(path),
+	 			"filesize" : filesize
+			}
+		except:
+			response = {
+				"path" : path,
+	 			"artist" : None,
+	 			"album" : None,
+	 			"genre" : None,
+	 			"length" : None,
+	 			"cover" : None,
+	 			"filesize" : filesize
+			}
 
 		return response
 
@@ -457,15 +469,18 @@ class Explorer():
 		return playlists
 
 	def __getFile(self, path):
-		extension = os.path.splitext(os.path.basename(path))[1]
-		audio = None
-		if(extension == ".mp3"):
-			audio = MP3(path, ID3=EasyID3)
-		elif(extension == ".flac"):
-			audio = FLAC(path)
-		elif(extension == ".ogg"):
-			audio = OggVorbis(path)
+		try:
+			extension = os.path.splitext(os.path.basename(path))[1]
+			audio = None
+			if(extension == ".mp3"):
+				audio = MP3(path, ID3=EasyID3)
+			elif(extension == ".flac"):
+				audio = FLAC(path)
+			elif(extension == ".ogg"):
+				audio = OggVorbis(path)
 
-		if audio != None:
-			return audio
-		return None
+			if audio != None:
+				return audio
+			return None
+		except:
+			return None
