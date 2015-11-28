@@ -213,9 +213,8 @@ class Track:
 		return int(round(time.time() * 1000))
 
 	def shouldEnd(self):
-		data = self.playbackInfo()
-		current = data.get('playback').get('position').get('millis')
-		total = data.get('playback').get('total').get('millis')
+		current = self.getPlaybackPosition()
+		total = round(self.getLength()
 
 		if current >= total or current == -1:
 			return True
