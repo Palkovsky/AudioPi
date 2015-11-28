@@ -336,8 +336,12 @@ class Explorer():
 		if not os.path.exists(end_path): #Don't recreate it every query. Do it only when there's no jpg cover
 			picture_data = cover.data
 
-			with open(end_path, 'wb') as img:
-				img.write(picture_data)
+			try:
+				with open(end_path, 'wb') as img:
+					img.write(picture_data)
+			except:
+				return end_path
+
 		return end_path
 
 	def __isAllowed(self, type, filters):
