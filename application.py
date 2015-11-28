@@ -351,9 +351,10 @@ def get_volume():
 
 	if value != None and value != "":
 		vol_response = volumizer.setVolume(value)
-		vol = vol_response['config']['milli']
-		playlistThreader.setVolume(vol)
-		trackThreader.setVolume(vol)
+		if vol_response != None:
+			vol = vol_response['config']['milli']
+			playlistThreader.setVolume(vol)
+			trackThreader.setVolume(vol)
 
 	respone = volumizer.getJSON()
 	respone.update({"code" : error_codes.SUCCESFULL_QUERY})
@@ -486,6 +487,15 @@ def flush():
 		"code" : error_codes.SUCCESFULL_QUERY,
 		"message" : "flushed"
 		})
+
+@app.route('/test', methods = ['GET'])
+def test():
+	return jsonify(
+			{
+				"code" : error_codes.SUCCESFULL_QUERY,
+				"message" : "Seems to be working fine"
+			}
+		)
 
 #Path for serving local files
 @app.route('/file', methods = ['GET'])
