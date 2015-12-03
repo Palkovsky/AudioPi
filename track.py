@@ -8,6 +8,7 @@ from mutagen.oggvorbis import OggVorbis
 from mutagen import File
 from mutagen.easyid3 import EasyID3
 from settings import volumizer
+from explore import Explorer
 import ntpath
 import os
 
@@ -21,6 +22,7 @@ class Track:
 		self.mixer.init()
 		self.setVolume(volume)
 		self.__beforePaused = -1
+		self.explorer = Explorer()
 
 		if onError != None:
 			self.loadTrack(path, onError)
@@ -158,7 +160,28 @@ class Track:
 			}
 		}
 
+	def playbackInfoExtended(self):
+		info = self.explorer.getMetadata(self.trackPath)
+		info['name'] = os.path.basename(self.trackPath)
+		return { 'playback' : {
+				'playing' : self.isPlaying(),
+				'paused' : self.isPaused(),
+				'muted' : self.isMuted(),
+				'path' : self.trackPath,
+				'position' : {
+					'millis' : self.getPlaybackPosition(),
+					'secs' : round(self.getPlaybackPosition() / 1000),
+					'formatted' : self.formattedTimestamp()
+				},
 
+				'total' : {
+					'millis' : round(self.getLength()),
+					'secs' : round(self.getLength()/1000),
+					'formatted' : self.formattedTimestamp(self.getLength())
+				}
+			},
+			'info' : info
+		}
 
 	def getMetadata(self):
 		return self.cachedMetadata

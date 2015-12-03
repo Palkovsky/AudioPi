@@ -126,6 +126,17 @@ def playback_track():
 		return jsonify(response)
 	return send_error(error_codes.NO_TRACK, "No track playing")
 
+
+
+@app.route('/track/online', methods=['GET'])
+def track_online():
+	currentTrack = trackThreader.currentTrack()
+	if(currentTrack != None):
+		response = currentTrack.playbackInfoExtended()
+		response['code'] = error_codes.SUCCESFULL_QUERY
+		return jsonify(response)
+	return send_error(error_codes.NO_TRACK, "No track playing")
+
 @app.route('/track/alive')
 def alive_track():
 	currentTrack = trackThreader.currentTrack()
