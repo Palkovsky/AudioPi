@@ -95,6 +95,12 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 EX. CURL:
 curl -i -X POST -H "Content-Type: multipart/form-data" -F "file=@Beck - Sexx Laws.mp3" -F "path=/media/andrzej/5960-A1D0/Inne" localhost:5000/file/upload
 
+/file/delete [GET, POST]
+	-path
+
+/file/new_catalog [GET, POST]
+	-path
+	-name
 
 ERROR CODES:
 		NO_TRACK = 1015

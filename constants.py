@@ -32,6 +32,7 @@ class ErrorGlobals():
 		self.UPLOAD_ERROR = 501
 		self.UNALLOWED_EXTENSION = 502
 		self.DATA_MANAGEMENT_ERROR = 503
+		self.INVALID_CATALOG_NAME = 504
 
 		#Paths
 		self.PATH_EMPTY = 1100
@@ -58,6 +59,8 @@ class ParamGlobals():
 		self.TRACK_SORT = "tsort"
 		self.METADATA = "meta"
 		self.LOCAL = "local"
+
+		self.NAME = "name"
 
 class Defaults():
 	def __init__(self):

@@ -571,6 +571,39 @@ def file_delete():
 			"message" : "An error while deleting file has occured"
 		})
 
+@app.route('/file/new_catalog', methods = ['GET', 'POST'])
+def create_catalog():
+	path = check_string(request, params.PATH)
+	name = check_string(request, params.NAME)
+	if path == None:
+		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
+	if not os.path.isdir(path):
+		return send_no_dir_error(path)
+	if name == "":
+		return jsonify({
+				"code" : error_codes.INVALID_CATALOG_NAME,
+				"message" : "Invalid name"
+			})	 
+
+	final_path = os.path.join(path, name)
+	if os.path.isdir(final_path):
+		return jsonify({
+				"code" : error_codes.DATA_MANAGEMENT_ERROR,
+				"message" : "Folder already exsists."
+			})
+
+	try:
+		os.mkdir(final_path)
+		return jsonify({
+				"code" : error_codes.SUCCESFULL_QUERY,
+				"message" : "Folder succesfully created"
+			})
+	except:
+		return jsonify({
+				"code" : error_codes.DATA_MANAGEMENT_ERROR,
+				"message" : "An error has occured."
+			})
+
 #Utility methods
 def flushTrack():
 	currentTrack = trackThreader.currentTrack()
