@@ -31,6 +31,7 @@ class ErrorGlobals():
 		self.REQUEST_TIMEOUT = 500
 		self.UPLOAD_ERROR = 501
 		self.UNALLOWED_EXTENSION = 502
+		self.DATA_MANAGEMENT_ERROR = 503
 
 		#Paths
 		self.PATH_EMPTY = 1100

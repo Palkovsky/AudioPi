@@ -12,6 +12,7 @@ from threader import TrackThreader, PlaylistThreader
 from settings import volumizer
 from explore import Explorer
 import os
+import shutil
 
 app = Flask(__name__)
 
@@ -546,6 +547,30 @@ def file_upload():
 			"message" : "Unallowed extension"
 		})
 
+@app.route('/file/delete', methods = ['GET', 'POST'])
+def file_delete():
+	path = check_string(request, params.PATH)
+
+	if path == None:
+		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
+	if not os.path.exists(path):
+		return send_no_file_error(path)
+
+	try:
+		if(os.path.isdir(path)):
+			shutil.rmtree(path)
+		else:
+			os.remove(path)
+		return jsonify({
+			"code" : error_codes.SUCCESFULL_QUERY,
+			"message" : "File/directory deleted"
+		})
+	except:
+		return jsonify({
+			"code" : error_codes.DATA_MANAGEMENT_ERROR,
+			"message" : "An error while deleting file has occured"
+		})
+
 #Utility methods
 def flushTrack():
 	currentTrack = trackThreader.currentTrack()
@@ -621,4 +646,4 @@ def onPlaylistLoadError():
 	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', debug=False, threaded = True)
+    app.run(debug=True, threaded = True)
