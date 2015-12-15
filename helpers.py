@@ -162,6 +162,13 @@ def send_no_file_error(path):
 		"path" : path
 	})
 
+def send_no_dir_error(path):
+	return jsonify({
+		"code" : error_codes.DIR_NOT_EXSIST,
+		"message" : "Directory doesn't exsist",
+		"path" : path
+	})	
+
 def file_exsists(path):
 	if path != None:
 		return os.path.isfile(path)
@@ -184,3 +191,10 @@ def translate_sorting_method(sortMethod, default = 0):
 			if sortMethod == method["name"]:
 				return method["value"]
 	return default
+
+def allowed_file(filename):
+	extension = os.path.splitext(filename)[1]
+	for ext in whitelisted_extensions:
+		if ext == extension:
+			return True
+	return False

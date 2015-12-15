@@ -88,6 +88,14 @@ This action gets all tracks on the filesystem and arranges them into playlists v
 /metadata [GET]
 	-path (path to audio file from which we want to export metadata)
 
+
+/file/upload [POST]
+	-path - endpoint directory
+	-file - path to file
+EX. CURL:
+curl -i -X POST -H "Content-Type: multipart/form-data" -F "file=@Beck - Sexx Laws.mp3" -F "path=/media/andrzej/5960-A1D0/Inne" localhost:5000/file/upload
+
+
 ERROR CODES:
 		NO_TRACK = 1015
 		TRACK_ALREADY_PAUSED = 1016

@@ -29,11 +29,14 @@ class ErrorGlobals():
 		#OTHERS
 		self.SUCCESFULL_QUERY = 999
 		self.REQUEST_TIMEOUT = 500
+		self.UPLOAD_ERROR = 501
+		self.UNALLOWED_EXTENSION = 502
 
 		#Paths
 		self.PATH_EMPTY = 1100
 		self.INVALID_PATH = 1101
 		self.FILE_NOT_EXSISTS = 1102
+		self.DIR_NOT_EXSIST = 1103
 
 		self.UNDEFINED = 111
 		

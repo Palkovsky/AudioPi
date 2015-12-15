@@ -1,11 +1,12 @@
 from flask import Flask
 from flask import request
 from flask import jsonify, send_from_directory
+from werkzeug import secure_filename
 from constants import error_codes, params
 from helpers import send_error, send_state_track_message
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
 from helpers import check_boolean, check_string, check_integer, check_float, check_string_array, isNull
-from helpers import check_int_array, translate_sorting_method
+from helpers import check_int_array, translate_sorting_method, send_no_dir_error, allowed_file
 from helpers import send_playlist_play_error, get_defaults, file_exsists, send_no_file_error, flush_stream
 from threader import TrackThreader, PlaylistThreader
 from settings import volumizer
@@ -520,6 +521,31 @@ def send_audio():
 
 	return send_from_directory(directory = os.path.dirname(path), filename = os.path.basename(path))	
 
+
+@app.route('/file/upload', methods = ['POST'])
+def file_upload():
+	path = check_string(request, params.PATH)
+	if path == None:
+		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
+	if not os.path.isdir(path):
+		return send_no_dir_error(path)
+
+	file = request.files['file']
+	if file and allowed_file(file.filename):
+		filename = secure_filename(file.filename)
+		file_path = os.path.join(path, filename)
+		file.save(file_path)
+		return jsonify({
+			"code" : error_codes.SUCCESFULL_QUERY,
+			"path" : file_path,
+			"message" : "File uploaded"
+			})
+
+	return jsonify({
+			"code" : error_codes.UNALLOWED_EXTENSION,
+			"message" : "Unallowed extension"
+		})
+
 #Utility methods
 def flushTrack():
 	currentTrack = trackThreader.currentTrack()
@@ -595,4 +621,4 @@ def onPlaylistLoadError():
 	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', debug=True, threaded = True)
+    app.run(host = '0.0.0.0', debug=False, threaded = True)
