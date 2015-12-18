@@ -4,6 +4,11 @@ from settings import volumizer
 from pygame import mixer
 import os
 
+def check_path(path):
+	if "/.." in path or "/~" in path or path.startswith("~") or path.startswith(".."):
+		return False
+	return True 
+
 def get_defaults(response_code = error_codes.SUCCESFULL_QUERY):
 	response = {
 		"defaults" : {

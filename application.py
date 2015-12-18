@@ -3,7 +3,7 @@ from flask import request
 from flask import jsonify, send_from_directory
 from werkzeug import secure_filename
 from constants import error_codes, params
-from helpers import send_error, send_state_track_message
+from helpers import send_error, send_state_track_message, check_path
 from helpers import send_state_playlist_message, track_endevent, is_valid_file, is_valid_num
 from helpers import check_boolean, check_string, check_integer, check_float, check_string_array, isNull
 from helpers import check_int_array, translate_sorting_method, send_no_dir_error, allowed_file
@@ -27,13 +27,12 @@ def play_track():
 	trackPath = check_string(request, params.PATH)
 	terminate = check_boolean(request, params.TERMINATE)
 
-	if not file_exsists(trackPath):
+	if not file_exsists(trackPath) or not check_path(trackPath):
 		return send_no_file_error(trackPath)
 
 	if currentTrack == None:
 		return startTrack(trackPath)
 	else:
-
 		if terminate:
 			currentTrack.stop()
 			trackThreader.setTrack(None)
@@ -403,8 +402,11 @@ def getDirectory():
 		sortingMethod = check_string(request, params.SORT)
 	sortingMethod = translate_sorting_method(sortingMethod, 0)
 
-	respone = explorer.getPathContent(path, metadata, sorting = sortingMethod)
-	if respone == None:
+	if check_path(path):
+		respone = explorer.getPathContent(path, metadata, sorting = sortingMethod)
+		if respone == None:
+			return send_error(error_codes.INVALID_PATH, "Invalid path")
+	else:
 		return send_error(error_codes.INVALID_PATH, "Invalid path")
 
 	respone['code'] = error_codes.SUCCESFULL_QUERY
@@ -422,6 +424,9 @@ def getAllTracks():
 	if sortingMethod == None:
 		sortingMethod = check_string(request, params.SORT)
 	sortingMethod = translate_sorting_method(sortingMethod, 1)
+
+	if not check_path(initialPath):
+		initialPath = None
 
 	if initialPath == None:
 		initialPath = get_defaults()["defaults"]["default_path"]
@@ -456,6 +461,9 @@ def getAllPlaylists():
 
 	initialPath = check_string(request, params.PATH)
 
+	if not check_path(initialPath):
+		initialPath = None
+	
 	if initialPath == None:
 		initialPath = get_defaults()["defaults"]["default_path"]
 
@@ -515,6 +523,9 @@ def test():
 def send_audio():
 	path = check_string(request, params.PATH)
 
+	if not check_path(path):
+		path = None
+
 	if path == None:
 		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
 	if not file_exsists(path):
@@ -526,6 +537,10 @@ def send_audio():
 @app.route('/file/upload', methods = ['POST'])
 def file_upload():
 	path = check_string(request, params.PATH)
+	
+	if not check_path(path):
+		path = None	
+	
 	if path == None:
 		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
 	if not os.path.isdir(path):
@@ -551,6 +566,9 @@ def file_upload():
 def file_delete():
 	path = check_string(request, params.PATH)
 
+	if not check_path(path):
+		path = None
+
 	if path == None:
 		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
 	if not os.path.exists(path):
@@ -575,6 +593,10 @@ def file_delete():
 def create_catalog():
 	path = check_string(request, params.PATH)
 	name = check_string(request, params.NAME)
+
+	if not check_path(path):
+		path = None
+
 	if path == None:
 		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
 	if not os.path.isdir(path):
@@ -627,7 +649,7 @@ def startTrack(trackPath):
 	if(trackPath == "" or trackPath == None):
 		return send_error(error_codes.NO_PATH_DEFINED, "No path parameter passed.")
 
-	if not os.path.exists(trackPath):
+	if not os.path.exists(trackPath) or not check_path(trackPath):
 		return send_error(error_codes.WRONG_PATH_SPECIFIED, "File doesn't exsist.")
 
 	if not is_valid_file(trackPath):
@@ -652,7 +674,7 @@ def startPlaylist(tracks, defaultPosition = 0):
 		errorPos = []
 		for index, trackPath in enumerate(tracks):
 
-			if not os.path.exists(trackPath):
+			if not os.path.exists(trackPath) or not check_path(trackPath):
 				errorPos.append({"index" : index})
 				errorPos[-1].update(send_error(error_codes.WRONG_PATH_SPECIFIED, "File doesn't exsist.", False))
 				continue
