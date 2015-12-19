@@ -55,8 +55,6 @@ class Track:
 				onError()
 
 	def play(self):
-		if(self.mixer.get_init() == None):
-			self.mixer.init()
 		self.mixer.music.play()
 
 	def stop(self):
@@ -88,10 +86,7 @@ class Track:
 		return 1
 
 	def isBusy(self):
-		if self.mixer.get_init() != None:
-			return self.mixer.music.get_busy
-		else:
-			return False
+		return self.mixer.music.get_busy()
 
 	def getVolume(self):
 		return self.mixer.music.get_volume()
@@ -104,9 +99,7 @@ class Track:
 		self.mixer.music.set_volume(volume)
 
 	def getPlaybackPosition(self):
-		if self.mixer.get_init() != None:
-			return self.mixer.music.get_pos() + self.playbackOffset
-		return -1
+		return self.mixer.music.get_pos() + self.playbackOffset
 
 	def setPlaybackPosition(self, secs):
 		curPlaybackPos = self.getPlaybackPosition()
