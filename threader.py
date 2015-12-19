@@ -26,7 +26,6 @@ class TrackThreader():
 		if(self.onEndCustomCallback == None):
 			if(self.track != None):
 				print(self.track.getPath() + " finished playing.")
-				self.track.mixer.quit()
 			self.setTrack(None)
 		else:
 			self.__play_track(track, self.onEndCustomCallback)
