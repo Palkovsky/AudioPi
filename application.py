@@ -580,9 +580,14 @@ def youtube_upload():
 	if url == None:
 		return send_error(error_codes.INVALID_URL, "You need to specify URL parameter")
 
-	thread = threading.Thread(target = explorer.downloadYouTube, args = (path, url))
-	thread.daemon = True
-	thread.start()
+	threaded = check_boolean(request, params.THREADED)
+
+	if threaded:
+		thread = threading.Thread(target = explorer.downloadYouTube, args = (path, url))
+		thread.daemon = True
+		thread.start()
+	else:
+		explorer.downloadYouTube(path, url)
 
 	return jsonify({
 			"code" : error_codes.SUCCESFULL_QUERY,
@@ -730,4 +735,4 @@ def onPlaylistLoadError():
 	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', debug=True, threaded = True)
+    app.run(host = '0.0.0.0', debug=False, threaded = True)

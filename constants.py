@@ -63,6 +63,7 @@ class ParamGlobals():
 
 		self.NAME = "name"
 		self.URL = "url"
+		self.THREADED = "thread"
 
 class Defaults():
 	def __init__(self):
