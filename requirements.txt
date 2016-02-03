@@ -1,3 +1,4 @@
 mutagen
 eyed3
 flask
+youtube-dl

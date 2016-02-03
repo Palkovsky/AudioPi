@@ -563,6 +563,7 @@ def file_upload():
 			"message" : "Unallowed extension"
 		})
 
+#Requres FFMPEG to be instaled on server
 @app.route('/file/youtube', methods = ['GET'])
 def youtube_upload():
 	path = check_string(request, params.PATH)
