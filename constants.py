@@ -33,6 +33,7 @@ class ErrorGlobals():
 		self.UNALLOWED_EXTENSION = 502
 		self.DATA_MANAGEMENT_ERROR = 503
 		self.INVALID_CATALOG_NAME = 504
+		self.INVALID_URL = 505
 
 		#Paths
 		self.PATH_EMPTY = 1100
@@ -61,6 +62,7 @@ class ParamGlobals():
 		self.LOCAL = "local"
 
 		self.NAME = "name"
+		self.URL = "url"
 
 class Defaults():
 	def __init__(self):

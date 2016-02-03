@@ -13,6 +13,7 @@ from settings import volumizer
 from explore import Explorer
 import os
 import shutil
+import threading
 
 app = Flask(__name__)
 
@@ -562,6 +563,33 @@ def file_upload():
 			"message" : "Unallowed extension"
 		})
 
+@app.route('/file/youtube', methods = ['GET'])
+def youtube_upload():
+	path = check_string(request, params.PATH)
+	
+	if not check_path(path):
+		path = None	
+	
+	if path == None:
+		return send_error(error_codes.INVALID_PATH, "You need to specify path parameter")
+	if not os.path.isdir(path):
+		return send_no_dir_error(path)
+
+	url = check_string(request, params.URL)
+	if url == None:
+		return send_error(error_codes.INVALID_URL, "You need to specify URL parameter")
+
+	thread = threading.Thread(target = explorer.downloadYouTube, args = (path, url))
+	thread.daemon = True
+	thread.start()
+
+	return jsonify({
+			"code" : error_codes.SUCCESFULL_QUERY,
+			"message" : "Query has been dispatched"
+		})
+
+
+
 @app.route('/file/delete', methods = ['GET', 'POST'])
 def file_delete():
 	path = check_string(request, params.PATH)
@@ -701,4 +729,4 @@ def onPlaylistLoadError():
 	return send_error(error_codes.INVALID_PATH, "Path error occured. Removing playlist...")
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', debug=False, threaded = True)
+    app.run(host = '0.0.0.0', debug=True, threaded = True)

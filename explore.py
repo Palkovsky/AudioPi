@@ -9,6 +9,7 @@ from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
 from mutagen.oggvorbis import OggVorbis
 from helpers import send_error
+import youtube_dl
 
 class Explorer():
 
@@ -31,6 +32,16 @@ class Explorer():
 
 		self.__filters = [f.NO_FILTERING, f.ARTISTS_ONLY, f.ALBUMS_ONLY, f.GENRES_ONLY,
 						f.UNKNOWN_ONLY, f.INCLUDE_ALL]
+
+
+		self.ydl_opts = {
+		    'format': 'bestaudio/best',
+		    'postprocessors': [{
+		        'key': 'FFmpegExtractAudio',
+		        'preferredcodec': 'mp3',
+		        'preferredquality': '192',
+		    }]
+		}
 
 	def getPathContent(self, path, metadata = False, sorting = 0):
 
@@ -484,3 +495,11 @@ class Explorer():
 			return None
 		except:
 			return None
+
+	def downloadYouTube(self, path, url):
+
+
+		os.chdir(path)
+
+		with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
+			ydl.download([url])
