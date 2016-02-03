@@ -10,6 +10,9 @@ from mutagen.mp3 import MP3
 from mutagen.oggvorbis import OggVorbis
 from helpers import send_error
 import youtube_dl
+import random
+import getpass
+import shutil
 
 class Explorer():
 
@@ -498,8 +501,26 @@ class Explorer():
 
 	def downloadYouTube(self, path, url):
 
+		username = getpass.getuser()
+		try:
+			os.mkdir("/home/" + username + "/temp")
+		except:
+			pass
+		os.chdir("/home/" + getpass.getuser() + "/temp")
 
-		os.chdir(path)
+		dirname = str(random.getrandbits(128))
+		try:
+			os.mkdir(dirname)
+		except:
+			pass
+		os.chdir(dirname)
 
 		with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
 			ydl.download([url])
+
+
+		for fil in os.listdir():
+			shutil.move(fil, path + "/" + fil)
+
+		os.chdir("/home/" + username + "/temp")
+		shutil.rmtree(dirname)
