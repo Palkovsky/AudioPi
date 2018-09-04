@@ -1,3 +1,9 @@
+## Audio Pi
+
+Backend for this app https://github.com/Palkovsky/AudioPi-Android. You can find more info(and video) there.
+
+### Stuff below was written when I worked on this project
+
 Little project, which will allow to control Raspberry Pi over Internet.
 
 
@@ -61,7 +67,7 @@ Gets all tracks on the filesystem
 This action gets all tracks on the filesystem and arranges them into playlists via ID3 tags
 /all_playlists [GET]
 	-filter = optional argument. It's int array You pass in array values to customize your feed.
-	
+
 	So if for example you want only playlists by artists and gentes you pass array [2, 3], for only
 	albums you'd pass [1]
 
